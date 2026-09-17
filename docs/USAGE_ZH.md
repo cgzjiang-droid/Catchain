@@ -91,5 +91,9 @@ venv/bin/python -m pytest tests/unit/extraction/test_llm_contract.py -q
 
 这不是模型抽取命令；目前没有LLM CLI。下一步接入DeepSeek，密钥使用
 `DEEPSEEK_API_KEY`环境变量，不能写进代码、文档或聊天。API鉴权和实际小样本
-调用待验证。本机连接DeepSeek和GitHub成功，不代表所有Registry都已测试。
+抽取调用待验证。本机DeepSeek GET /models鉴权成功，不代表所有Registry都已测试。
 详见Slice 5实施计划和第5课；当前页数/字符上限不等于Token或费用上限。
+
+本机API密钥已通过隐藏输入框存入项目根目录.env，权限600，Git忽略。
+当前CLI尚不自动加载该文件；后续adapter接入时增加配置读取。密钥配置完成
+不等于真实抽取完成，GET /models成功也不验证余额或模型抽取能力。

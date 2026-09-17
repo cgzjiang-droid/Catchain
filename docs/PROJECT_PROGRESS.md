@@ -163,6 +163,12 @@ Slice 4 已完成：
 - 已完成响应合同、显式选页和引用定位检查，6项新离线测试通过。
 - 实施计划：`docs/superpowers/plans/2026-09-17-slice-5-llm-extraction.md`。
 - 学习资料：`docs/learning/05-llm-extraction-boundary.md`。
-- 用户选择DeepSeek；本机服务器可达，但尚无DEEPSEEK_API_KEY，未做真实调用。
+- 用户选择DeepSeek；本机API鉴权成功，本地.env已配置（Git忽略、权限600）；未做付费抽取调用。
 - Prompt、adapter、调用缓存、失败持久化、费用记录和LLM CLI尚未实现。
 - 所有LLM候选保持unvalidated；Slice 6的语义/业务验证未提前宣称完成。
+
+### DeepSeek API配置检查点
+
+本地.env保存DEEPSEEK_API_KEY（不上传），权限600。GET /models鉴权成功，
+返回deepseek-flash、deepseek-v4-pro。未调用生成接口；这不证明抽取质量或余额充足。
+后续adapter必须读取环境变量或本地配置，不能假设当前.env已被CLI自动加载。

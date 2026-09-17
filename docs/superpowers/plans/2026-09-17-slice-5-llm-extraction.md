@@ -28,4 +28,5 @@
 
 2026-09-17：本机访问api.deepseek.com收到HTTP 401，参考GitHub页面HTTP 200。
 这仅证明两个站点网络可达，不代表Registry全部可达、API账号有余额或模型调用成功。
-DEEPSEEK_API_KEY未配置。真实调用、tokens/费用记录、缓存和CLI仍待实施。
+本地.env已保存DEEPSEEK_API_KEY，Git忽略、权限600；GET /models鉴权成功。
+返回deepseek-flash、deepseek-v4-pro。生成抽取、tokens/费用记录、缓存和CLI仍待实施。
