@@ -13,7 +13,8 @@ audit, shared extraction contract and initial page-based scalar regex baseline
 keyword baseline and CLI chain are implemented and compared with legacy outputs.
 Broader company assets and network adapters remain pending. Slice 5 now includes a versioned prompt, a single-call DeepSeek JSON adapter,
 response/run logging, grounding checks and the llm-once CLI. One real pilot call
-has succeeded. Pre-call caching, pricing/budget controls and fair evaluation remain pending.
+has succeeded. Completed-input caching and opt-in pricing/budget controls are in place;
+fair, fixed-input evaluation remains pending.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 

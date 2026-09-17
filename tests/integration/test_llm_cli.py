@@ -84,6 +84,12 @@ def test_llm_cli_import_parse_and_extract_uses_source_identity(tmp_path, monkeyp
         str(database),
         "--output-dir",
         str(output),
+        "--input-cost-per-million-usd",
+        "100",
+        "--output-cost-per-million-usd",
+        "100",
+        "--max-estimated-cost-usd",
+        "1",
     ]
     extracted = runner.invoke(app, args)
     assert extracted.exit_code == 0, extracted.exception
@@ -91,8 +97,13 @@ def test_llm_cli_import_parse_and_extract_uses_source_identity(tmp_path, monkeyp
     artifact = json.loads(Path(info["artifact_path"]).read_text())
     assert info["project_id"] == artifact["result"]["project_id"] == "VCS1"
     assert artifact["result"]["document_version_id"] == version
-    assert info["cache_enabled"] is False and len(calls) == 1
+    assert info["cache_enabled"] is True and len(calls) == 1
+    assert info["estimated_cost_usd"] == "0.006"
     assert artifact["result"]["observations"][0]["validation_status"] == "unvalidated"
+    cached = runner.invoke(app, args)
+    assert cached.exit_code == 0, cached.exception
+    assert json.loads(cached.stdout)["status"] == "reused"
+    assert len(calls) == 1
     invalid = runner.invoke(app, [*args, "--page", "2"])
     assert invalid.exit_code == 1
     assert len(calls) == 1

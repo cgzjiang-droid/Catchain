@@ -3,6 +3,7 @@
 import hashlib
 import json
 from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Annotated
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
@@ -338,10 +339,21 @@ def extract_llm_once(
     config_file: Annotated[Path, typer.Option("--config-file")] = Path(".env"),
     model: Annotated[str, typer.Option("--model")] = "deepseek-flash",
     max_output_tokens: Annotated[int, typer.Option("--max-output-tokens", min=1, max=4096)] = 1024,
+    input_cost_per_million_usd: Annotated[
+        str | None, typer.Option("--input-cost-per-million-usd")
+    ] = None,
+    output_cost_per_million_usd: Annotated[
+        str | None, typer.Option("--output-cost-per-million-usd")
+    ] = None,
+    max_estimated_cost_usd: Annotated[str | None, typer.Option("--max-estimated-cost-usd")] = None,
 ) -> None:
-    """One paid development call. No cache: repeating this command may incur cost."""
-    from catchain.extraction.llm.providers import DeepSeekProvider, ProviderError, read_deepseek_key
-    from catchain.extraction.llm.workflow import extract_one_call
+    """One bounded development call; matching completed inputs reuse an existing result."""
+    from catchain.extraction.llm.providers import (
+        DeepSeekProvider,
+        ProviderError,
+        read_deepseek_key,
+    )
+    from catchain.extraction.llm.workflow import CostRates, extract_one_call
 
     repository = SqlAlchemyDocumentRepository(create_sqlite_engine(database))
     parsed = repository.get_parsed(parsed_document_id)
@@ -352,6 +364,11 @@ def extract_llm_once(
     if source is None:
         _fail_parse("SOURCE_NOT_FOUND", "Parsed document has no source identity")
     try:
+        prices = (input_cost_per_million_usd, output_cost_per_million_usd)
+        if any(prices) and not all(prices):
+            raise ValueError("provide both input and output token prices")
+        cost_rates = CostRates(Decimal(prices[0]), Decimal(prices[1])) if all(prices) else None
+        maximum_cost = Decimal(max_estimated_cost_usd) if max_estimated_cost_usd else None
         provider = DeepSeekProvider(api_key=read_deepseek_key(config_file), model=model)
         artifact = extract_one_call(
             parsed,
@@ -362,28 +379,33 @@ def extract_llm_once(
             registry=source.registry,
             output_dir=output_dir,
             max_output_tokens=max_output_tokens,
+            cost_rates=cost_rates,
+            max_estimated_cost_usd=maximum_cost,
         )
-    except (ProviderError, ValueError, OSError) as error:
+    except (InvalidOperation, ProviderError, ValueError, OSError) as error:
         message = (
             str(error) if isinstance(error, ProviderError) else "invalid input or storage failed"
         )
         _fail_parse("LLM_EXTRACTION_FAILED", message)
-    result = json.loads(artifact.read_text())
-    response = json.loads((artifact.parent / "response.json").read_text())
+    result = json.loads(artifact.path.read_text())
+    configuration = result["configuration"]
+    response_path = output_dir / "runs" / result["run"]["pipeline_run_id"] / "response.json"
+    response = json.loads(response_path.read_text())
     typer.echo(
         json.dumps(
             {
-                "status": "stored",
-                "artifact_path": str(artifact),
+                "status": "reused" if artifact.reused else "stored",
+                "artifact_path": str(artifact.path),
                 "project_id": source.registry_project_id,
                 "registry": source.registry.value,
                 "pipeline_run_id": result["run"]["pipeline_run_id"],
                 "input_tokens": response["input_tokens"],
                 "output_tokens": response["output_tokens"],
                 "latency_seconds": response["latency_seconds"],
-                "estimated_cost": None,
+                "estimated_cost_usd": result["call_metrics"]["actual_estimated_cost_usd"],
+                "worst_case_estimated_cost_usd": configuration["worst_case_estimated_cost_usd"],
                 "validation_status": "unvalidated",
-                "cache_enabled": False,
+                "cache_enabled": True,
             }
         )
     )

@@ -98,14 +98,27 @@ venv/bin/catchain extract llm-once PARSED_UUID \
 明确支持的deepseek-v4-pro。默认输出上限1024 Token，--max-output-tokens最大4096。
 选页最多8页/24000字符，页面完整保留；超限失败，不悄悄截断。
 
-**当前llm-once没有调用前缓存，每次执行都可能计费；不要用它批量重跑。**
-每次最多一次模型调用、零自动retry。API空响应、截断、非法JSON或假引用会失败。
+相同的已成功输入会复用缓存，不再调用模型；缓存键包含文档版本/Parsed内容、选页、
+字段、Prompt、Schema、模型、输出上限和费用配置。任一项改变会产生新调用。每次新
+调用最多一次、零自动retry；同键调用正在进行时会停止，避免并发重复计费。API空响应、
+截断、非法JSON或假引用会失败，并保留失败记录；失败结果不缓存。
 输出artifact_path指向私有run目录中的result.json。started.json和response.json保存
 输入身份/配置哈希、模型原始响应、tokens和延迟；失败保存failed.json。
 结果仍unvalidated，不写Canonical事实，不生成最终业务评分。
 
-estimated_cost当前为null，表示价格尚未配置，不是免费。调用前缓存、明确价格、
-货币预算和受控retry是下一Task。Token是模型计量单位，字符预算不是精确Token预算。
+默认estimated_cost_usd为null，表示价格没有由调用者明确配置，不是免费。不要把
+当前价格硬编码到项目里；使用当日确认的供应商价格运行，例如：
+
+```bash
+venv/bin/catchain extract llm-once PARSED_UUID --page 1 --field project_name \
+  --input-cost-per-million-usd 当日输入价格 \
+  --output-cost-per-million-usd 当日输出价格 \
+  --max-estimated-cost-usd 本次最多金额
+```
+
+只有输入和输出价格同时提供时，系统才按真实返回Token记录estimated_cost_usd。
+设置金额上限时价格是必填项；系统在请求前按输入字节上界和最大输出Token做保守估算，
+超过上限就不联网。Token是模型计量单位，字符/字节上界不是精确输入Token数。
 首次真实调用验证见docs/validation/2026-09-17-slice-5-first-real-call.md。
 
 离线测试不会联网或计费：

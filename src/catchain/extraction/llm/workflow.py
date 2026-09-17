@@ -4,7 +4,9 @@ import hashlib
 import json
 import os
 import time
+from dataclasses import dataclass
 from datetime import UTC, datetime
+from decimal import Decimal
 from importlib.resources import files
 from pathlib import Path
 from typing import get_args
@@ -24,6 +26,66 @@ def digest(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
+@dataclass(frozen=True)
+class CostRates:
+    """Explicit USD prices per million tokens; never silently assume a price."""
+
+    input_per_million_usd: Decimal
+    output_per_million_usd: Decimal
+
+    def __post_init__(self) -> None:
+        if self.input_per_million_usd < 0 or self.output_per_million_usd < 0:
+            raise ValueError("token prices must be non-negative")
+
+
+@dataclass(frozen=True)
+class ExtractionArtifact:
+    path: Path
+    reused: bool
+
+
+def _money(value: Decimal) -> str:
+    return format(value, "f")
+
+
+def _estimated_cost(input_tokens: int, output_tokens: int, rates: CostRates | None) -> str | None:
+    if rates is None:
+        return None
+    return _money(
+        (
+            Decimal(input_tokens) * rates.input_per_million_usd
+            + Decimal(output_tokens) * rates.output_per_million_usd
+        )
+        / Decimal(1_000_000)
+    )
+
+
+def _read_cached(path: Path, configuration: dict) -> bool:
+    try:
+        cached = json.loads(path.read_text(encoding="utf-8"))
+        run = PipelineRun.model_validate(cached["run"])
+        return (
+            run.status is RunStatus.SUCCEEDED
+            and cached["configuration"] == configuration
+            and cached["result"]["pipeline_run_id"] == str(run.pipeline_run_id)
+        )
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def _write_once(path: Path, payload: dict) -> None:
+    """Publish a completed cache entry atomically without replacing prior evidence."""
+    temporary = path.with_name(path.name + ".tmp-" + str(os.getpid()))
+    try:
+        with temporary.open("x", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def extract_one_call(
     parsed: ParsedDocument,
     *,
@@ -34,8 +96,10 @@ def extract_one_call(
     registry: Registry,
     output_dir: Path,
     max_output_tokens: int = 1024,
-) -> Path:
-    """Explicit development call. No cache yet: every invocation may incur cost."""
+    cost_rates: CostRates | None = None,
+    max_estimated_cost_usd: Decimal | None = None,
+) -> ExtractionArtifact:
+    """At most one paid call, with a completed-input cache and an optional cost ceiling."""
     pages = select_pages(parsed, page_numbers)
     if (
         not requested_fields
@@ -57,6 +121,15 @@ def extract_one_call(
     )
     if len(input_json.encode()) + len(prompt.encode()) > 60000:
         raise ValueError("prompt/input byte budget exceeded")
+    if max_estimated_cost_usd is not None and max_estimated_cost_usd < 0:
+        raise ValueError("maximum estimated cost must be non-negative")
+    input_token_upper_bound = len((prompt + input_json).encode())
+    worst_case_cost = _estimated_cost(input_token_upper_bound, max_output_tokens, cost_rates)
+    if max_estimated_cost_usd is not None:
+        if cost_rates is None:
+            raise ValueError("cost ceiling requires explicit input and output token prices")
+        if Decimal(worst_case_cost) > max_estimated_cost_usd:
+            raise ValueError("worst-case estimated cost exceeds configured ceiling")
     configuration = {
         "provider": provider.name,
         "model": provider.model,
@@ -69,13 +142,30 @@ def extract_one_call(
                 [{"number": page.page_number, "text": page.text} for page in pages], sort_keys=True
             )
         ),
-        "requested_fields": requested_fields,
+        "requested_fields": list(requested_fields),
         "max_output_tokens": max_output_tokens,
+        "input_token_upper_bound": input_token_upper_bound,
         "max_calls": 1,
         "retry_count": 0,
-        "estimated_cost": None,
-        "cost_status": "pricing_not_configured",
+        "input_cost_per_million_usd": (
+            _money(cost_rates.input_per_million_usd) if cost_rates else None
+        ),
+        "output_cost_per_million_usd": (
+            _money(cost_rates.output_per_million_usd) if cost_rates else None
+        ),
+        "worst_case_estimated_cost_usd": worst_case_cost,
+        "cost_status": "configured" if cost_rates else "pricing_not_configured",
     }
+    cache_key = digest(
+        json.dumps(
+            {
+                "document_version_id": str(parsed.document_version_id),
+                "parsed_document_hash": digest(parsed.model_dump_json()),
+                "configuration": configuration,
+            },
+            sort_keys=True,
+        )
+    )
     run = PipelineRun(
         stage=PipelineStage.LLM_EXTRACTED,
         status=RunStatus.RUNNING,
@@ -84,8 +174,22 @@ def extract_one_call(
         started_at=datetime.now(UTC),
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    directory = output_dir / str(run.pipeline_run_id)
-    directory.mkdir()  # Unique run; never replace earlier response or failure evidence.
+    cache_dir = output_dir / "cache"
+    cache_dir.mkdir(exist_ok=True)
+    cache_path = cache_dir / f"{cache_key}.json"
+    if cache_path.exists():
+        if _read_cached(cache_path, configuration):
+            return ExtractionArtifact(path=cache_path, reused=True)
+        raise ProviderError(f"cached artifact conflict: {cache_path}")
+    lock_dir = output_dir / ".locks"
+    lock_dir.mkdir(exist_ok=True)
+    lock_path = lock_dir / cache_key
+    try:
+        lock_path.mkdir()
+    except FileExistsError:
+        raise ProviderError(f"matching extraction is already in progress: {lock_path}") from None
+    directory = output_dir / "runs" / str(run.pipeline_run_id)
+    directory.mkdir(parents=True)
 
     def write(name, payload):
         with (directory / name).open("x", encoding="utf-8") as handle:
@@ -107,6 +211,10 @@ def extract_one_call(
     )
     started = time.monotonic()
     try:
+        if cache_path.exists():
+            if _read_cached(cache_path, configuration):
+                return ExtractionArtifact(path=cache_path, reused=True)
+            raise ProviderError(f"cached artifact conflict: {cache_path}")
         reply = provider.extract(
             system_prompt=prompt, input_json=input_json, max_output_tokens=max_output_tokens
         )
@@ -139,8 +247,15 @@ def extract_one_call(
                 "result": result.model_dump(mode="json"),
                 "run": finished.model_dump(mode="json"),
                 "configuration": configuration,
+                "call_metrics": {
+                    "actual_estimated_cost_usd": _estimated_cost(
+                        reply.input_tokens, reply.output_tokens, cost_rates
+                    )
+                },
             },
         )
+        payload = json.loads((directory / "result.json").read_text(encoding="utf-8"))
+        _write_once(cache_path, payload)
     except (ProviderError, ValueError, OSError) as error:
         # Do not leak Pydantic input_value, raw quotes, keys or provider error bodies in logs.
         code = type(error).__name__
@@ -159,4 +274,6 @@ def extract_one_call(
             {"run": failed.model_dump(mode="json"), "elapsed_seconds": time.monotonic() - started},
         )
         raise ProviderError(f"{message}; failure record: {directory}") from None
-    return directory / "result.json"
+    finally:
+        lock_path.rmdir()
+    return ExtractionArtifact(path=cache_path, reused=False)

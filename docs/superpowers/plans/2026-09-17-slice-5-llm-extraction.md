@@ -11,7 +11,7 @@
 - [x] Task 2：版本化prompt、离线fake adapter及DeepSeek JSON Output adapter。
   - API空content、截断、网络/鉴权错误明确区分；密钥只读环境变量。
   - Protocol返回原始JSON，解析/验证由独立workflow负责。
-- [ ] Task 3：调用前缓存、run/call记录、tokens/延迟/成本和有界retry。
+- [x] Task 3：调用前缓存、run/call记录、tokens/延迟/成本和有界retry。
   - 缓存身份包括文档、选中页、prompt/schema版本和model。
   - 成本须基于明确价格配置；未知费用不得写成0。失败记录也要持久化。
 - [ ] Task 4：CLI接入、数据库来源身份检查、真实小样本调用及与Regex的逐字段对比。
@@ -30,10 +30,20 @@
 这仅证明两个站点网络可达，不代表Registry全部可达、API账号有余额或模型调用成功。
 本地.env已保存DEEPSEEK_API_KEY，Git忽略、权限600；GET /models鉴权成功。
 返回deepseek-flash、deepseek-v4-pro。已完成一次生成抽取及llm-once CLI；Token/延迟与成功/失败run记录已落盘。
-调用前缓存、价格与费用控制、固定同输入样本对比尚待实施。
+调用前缓存、显式价格与费用上限已实现；固定同输入样本对比尚待实施。
 
 ## Task 2验收
 
 75测试、Ruff、wheel构建通过。真实ACR125第1页四字段请求成功，2候选/2弃答。
 见`docs/validation/2026-09-17-slice-5-first-real-call.md`。Task 4的CLI部分提前完成，
 但完整对比验收未完成。llm-once每次调用可能计费，零自动retry，不是批量入口。
+
+## Task 3验收
+
+缓存键绑定文档版本/Parsed内容、选页、字段、Prompt、Schema、模型、输出上限和
+费用配置。相同已成功输入直接复用完成的JSON，不调用模型；同键进行中会停止，避免
+并发重复计费。失败不缓存，保留失败run供人工调查。每次新调用最多一次、零自动retry。
+
+价格不是内置常量：只有调用者明确给出输入/输出每百万Token的USD价格时，才记录
+实际估算费用。设置`--max-estimated-cost-usd`必须同时给出两项价格；系统用输入字节
+上界和最大输出Token计算保守上限，并在请求前阻止超额调用。未知价格保持null。
