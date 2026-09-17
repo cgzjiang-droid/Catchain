@@ -8,7 +8,7 @@
   - 返回missing、rejected或needs_review，保留原候选及具体问题，不删除证据。
   - 同字段冲突、模糊日期、低于0.8置信度转审核；null置信度不能当高置信度。
   - 未确认语义支持的候选保持needs_review，没有自动Canonical写入。
-- [ ] Task 2：跨字段日期/单位/方法学规则、跨文档与版本冲突。
+- [x] Task 2：跨字段日期/单位/方法学规则、跨文档与版本冲突。
   - 权威来源优先级必须字段化、版本化；新文档不能仅因更新就覆盖旧正式值。
 - [ ] Task 3：Canonical候选/证据/验证/审核决策数据库和迁移。
   - 只有显式通过规则或审核决策的值才成为正式事实；保留所有候选和拒绝理由。
@@ -28,3 +28,14 @@ validate extraction接受Regex/LLM候选artifact，从SQLite核对来源/run/Par
 
 真实ACR125已保存响应：2项待审核、2项缺失、0项Canonical写入、0次模型调用。
 8个JSON Schema中新增ExtractionValidationReport，旧候选合同保持不变。
+
+## Task 2验收与边界
+
+新增validate project：接收同项目的验证报告，从SQLite核对来源，保存独立不可变一致性报告。
+日期先后只在同份报告内检查，跨文档比较仅限项目层字段；核证周期与计量值不视作项目常量。
+差异保留全部候选、页码证据、来源哈希和处理run，状态为unresolved。
+权威策略manual-unresolved-v1明确不自动挑选新版本；完整字段权威矩阵需业务确认后版本化。
+ACM0002未确认时阻止假定业务适用范围；暂不实现未核实的公式或评分规则。
+真实ACR125单文档离线验证发现methodology_scope_unconfirmed，0次模型调用、0次正式值写入。
+跨文档/跨版本行为目前由测试样例验证，尚未完成真实多文档验收。
+新增第9个Schema ProjectConsistencyReport。下一步Task 3：结构化数据库。

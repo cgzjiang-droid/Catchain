@@ -16,6 +16,7 @@ def test_generate_json_schemas_exports_public_models(tmp_path: Path) -> None:
         "field-observation.schema.json",
         "parsed-document.schema.json",
         "pipeline-run.schema.json",
+        "project-consistency-report.schema.json",
         "project-extraction.schema.json",
         "source-document.schema.json",
     ]
@@ -47,4 +48,4 @@ def test_schema_export_cli_reports_written_files(tmp_path: Path) -> None:
     result = runner.invoke(app, ["schema", "export", "--output-dir", str(tmp_path)])
 
     assert result.exit_code == 0
-    assert "Exported 8 schemas" in result.stdout
+    assert "Exported 9 schemas" in result.stdout

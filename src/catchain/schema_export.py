@@ -14,6 +14,7 @@ from catchain.domain import (
     ProjectExtraction,
     SourceDocument,
 )
+from catchain.domain.consistency import ProjectConsistencyReport
 from catchain.domain.validation import ExtractionValidationReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
@@ -24,6 +25,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "parsed-document": ParsedDocument,
     "pipeline-run": PipelineRun,
     "project-extraction": ProjectExtraction,
+    "project-consistency-report": ProjectConsistencyReport,
     "source-document": SourceDocument,
 }
 

@@ -564,3 +564,119 @@ def validate_extraction_command(
             }
         )
     )
+
+
+@validate_app.command("project")
+def validate_project_command(
+    validation_artifacts: Annotated[list[Path], typer.Argument()],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted/consistency"),
+) -> None:
+    """Offline consistency checks on one project's validated candidate reports."""
+    from catchain.domain.consistency import ValidationInput
+    from catchain.domain.validation import ExtractionValidationReport
+    from catchain.validation.consistency import validate_project
+
+    started_at = datetime.now(UTC)
+    try:
+        if not 1 <= len(validation_artifacts) <= 20:
+            raise ValueError("select between one and twenty reports")
+        repository = SqlAlchemyDocumentRepository(create_sqlite_engine(database))
+        inputs = []
+        for artifact in validation_artifacts:
+            bundle = json.loads(artifact.read_text(encoding="utf-8"))
+            report = ExtractionValidationReport.model_validate(bundle["result"])
+            prior_run = PipelineRun.model_validate(bundle["run"])
+            parsed = repository.get_parsed(report.parsed_document_id)
+            version = repository.get_version(report.document_version_id)
+            source = repository.get_source(version.source_document_id) if version else None
+            if (
+                parsed is None
+                or version is None
+                or source is None
+                or parsed.document_version_id != report.document_version_id
+                or (source.registry_project_id, source.registry)
+                != (report.project_id, report.registry)
+                or prior_run.pipeline_run_id != report.pipeline_run_id
+                or prior_run.status is not RunStatus.SUCCEEDED
+                or prior_run.stage is not PipelineStage.QUALITY_VALIDATED
+                or prior_run.input_hash
+                != hashlib.sha256(parsed.model_dump_json().encode()).hexdigest()
+            ):
+                raise ValueError("validation/source/run identity mismatch")
+            # Input reports remain untrusted files: check linked source quotes again.
+            for check in report.checks:
+                for evidence in check.observation.evidence:
+                    if (
+                        evidence.document_version_id != version.document_version_id
+                        or not 1 <= evidence.page_number <= len(parsed.pages)
+                    ):
+                        if check.status != "rejected":
+                            raise ValueError("nonrejected evidence has invalid source identity")
+                        continue
+                    text = parsed.pages[evidence.page_number - 1].text
+                    if check.status != "rejected" and (
+                        not evidence.quote.strip()
+                        or evidence.quote not in text
+                        or (
+                            evidence.char_start is not None
+                            and (
+                                evidence.char_end > len(text)
+                                or text[evidence.char_start : evidence.char_end] != evidence.quote
+                            )
+                        )
+                    ):
+                        raise ValueError("nonrejected evidence differs from source")
+            inputs.append(
+                ValidationInput(
+                    report=report,
+                    source_document_id=source.source_document_id,
+                    document_type=source.document_type,
+                    sha256=version.sha256,
+                    declared_version=version.declared_version,
+                    retrieved_at=version.retrieved_at,
+                )
+            )
+        run_id = uuid4()
+        report = validate_project(tuple(inputs), pipeline_run_id=run_id)
+        payload = report.model_dump(mode="json")
+        identity = {key: value for key, value in payload.items() if key != "pipeline_run_id"}
+        identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
+        run = PipelineRun(
+            pipeline_run_id=run_id,
+            stage=PipelineStage.QUALITY_VALIDATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=identity_hash,
+            config_hash=hashlib.sha256(
+                json.dumps(
+                    {
+                        "rule_version": report.rule_version,
+                        "authority_policy": report.authority_policy,
+                    },
+                    sort_keys=True,
+                ).encode()
+            ).hexdigest(),
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+        )
+        path, stored, reused = store_baseline_artifact(output_dir, payload, run)
+    except (ValueError, OSError, KeyError, TypeError):
+        _fail_parse(
+            "CONSISTENCY_FAILED", "input/source/evidence validation or report storage failed"
+        )
+    result = stored["result"]
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "issue_count": len(result["issues"]),
+                "issue_codes": sorted({issue["code"] for issue in result["issues"]}),
+                "cross_document_comparison": result["cross_document_comparison"],
+                "authority_policy": result["authority_policy"],
+                "canonical_writes": 0,
+                "model_calls": 0,
+            }
+        )
+    )

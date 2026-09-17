@@ -1,0 +1,629 @@
+{
+  "$defs": {
+    "CandidateLink": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_index": {
+          "minimum": 0,
+          "title": "Observation Index",
+          "type": "integer"
+        },
+        "validation_run_id": {
+          "format": "uuid",
+          "title": "Validation Run Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "validation_run_id",
+        "observation_index"
+      ],
+      "title": "CandidateLink",
+      "type": "object"
+    },
+    "CandidateValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/ValidationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "observation": {
+          "$ref": "#/$defs/FieldObservation"
+        },
+        "observation_index": {
+          "minimum": 0,
+          "title": "Observation Index",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "missing",
+            "rejected",
+            "needs_review"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_index",
+        "observation",
+        "status",
+        "issues"
+      ],
+      "title": "CandidateValidation",
+      "type": "object"
+    },
+    "ConsistencyIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/CandidateLink"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "enum": [
+              "project_id",
+              "project_name",
+              "country",
+              "grid_connection_status",
+              "project_boundary_text",
+              "technology_type",
+              "installed_capacity_mw",
+              "renewable_resource_type",
+              "baseline_scenario_text",
+              "baseline_formula_present",
+              "baseline_assumptions_table",
+              "ef_value",
+              "ef_unit",
+              "ef_source_reference",
+              "ef_vintage_year",
+              "electricity_generated_mwh",
+              "electricity_exported_mwh",
+              "meter_calibration_status",
+              "data_frequency",
+              "pe_applicable_flag",
+              "pe_value_tco2e",
+              "pe_method_text",
+              "le_applicable_flag",
+              "le_value_tco2e",
+              "le_justification_text",
+              "be_value_tco2e",
+              "er_reported_tco2e",
+              "er_recalculated_tco2e",
+              "er_recalc_error_pct",
+              "additionality_tool_used",
+              "investment_analysis_result",
+              "barrier_analysis_result",
+              "common_practice_result",
+              "monitoring_parameters_listed",
+              "qa_qc_procedure_text",
+              "data_gap_procedure_text",
+              "archiving_period_years",
+              "validator_name",
+              "verifier_name",
+              "verification_period_start",
+              "verification_period_end",
+              "verification_cycle_count",
+              "methodology_name",
+              "methodology_version",
+              "registered_date",
+              "listed_date",
+              "issuance_cycle_count",
+              "version_change_note",
+              "project_participant",
+              "project_owner",
+              "project_developer",
+              "project_operator",
+              "crediting_period_years",
+              "crediting_period_start",
+              "crediting_period_end"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Fields",
+          "type": "array"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "status": {
+          "const": "unresolved",
+          "default": "unresolved",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "fields",
+        "candidates",
+        "message"
+      ],
+      "title": "ConsistencyIssue",
+      "type": "object"
+    },
+    "DocumentType": {
+      "enum": [
+        "project_description",
+        "monitoring_report",
+        "validation_report",
+        "verification_report",
+        "registry_export",
+        "other"
+      ],
+      "title": "DocumentType",
+      "type": "string"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "char_end": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char End"
+        },
+        "char_start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char Start"
+        },
+        "document_version_id": {
+          "format": "uuid",
+          "title": "Document Version Id",
+          "type": "string"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_version_id",
+        "page_number",
+        "quote"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "ExtractionValidationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_writes": {
+          "const": 0,
+          "default": 0,
+          "title": "Canonical Writes",
+          "type": "integer"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CandidateValidation"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "document_version_id": {
+          "format": "uuid",
+          "title": "Document Version Id",
+          "type": "string"
+        },
+        "extraction_run_id": {
+          "format": "uuid",
+          "title": "Extraction Run Id",
+          "type": "string"
+        },
+        "parsed_document_id": {
+          "format": "uuid",
+          "title": "Parsed Document Id",
+          "type": "string"
+        },
+        "pipeline_run_id": {
+          "format": "uuid",
+          "title": "Pipeline Run Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "registry": {
+          "$ref": "#/$defs/Registry"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "validator_version": {
+          "const": "candidate-mechanical-v1",
+          "default": "candidate-mechanical-v1",
+          "title": "Validator Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pipeline_run_id",
+        "extraction_run_id",
+        "parsed_document_id",
+        "document_version_id",
+        "project_id",
+        "registry",
+        "checks"
+      ],
+      "title": "ExtractionValidationReport",
+      "type": "object"
+    },
+    "FieldObservation": {
+      "additionalProperties": false,
+      "description": "An unvalidated candidate or explicit abstention; never a canonical fact.",
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "field_name": {
+          "enum": [
+            "project_id",
+            "project_name",
+            "country",
+            "grid_connection_status",
+            "project_boundary_text",
+            "technology_type",
+            "installed_capacity_mw",
+            "renewable_resource_type",
+            "baseline_scenario_text",
+            "baseline_formula_present",
+            "baseline_assumptions_table",
+            "ef_value",
+            "ef_unit",
+            "ef_source_reference",
+            "ef_vintage_year",
+            "electricity_generated_mwh",
+            "electricity_exported_mwh",
+            "meter_calibration_status",
+            "data_frequency",
+            "pe_applicable_flag",
+            "pe_value_tco2e",
+            "pe_method_text",
+            "le_applicable_flag",
+            "le_value_tco2e",
+            "le_justification_text",
+            "be_value_tco2e",
+            "er_reported_tco2e",
+            "er_recalculated_tco2e",
+            "er_recalc_error_pct",
+            "additionality_tool_used",
+            "investment_analysis_result",
+            "barrier_analysis_result",
+            "common_practice_result",
+            "monitoring_parameters_listed",
+            "qa_qc_procedure_text",
+            "data_gap_procedure_text",
+            "archiving_period_years",
+            "validator_name",
+            "verifier_name",
+            "verification_period_start",
+            "verification_period_end",
+            "verification_cycle_count",
+            "methodology_name",
+            "methodology_version",
+            "registered_date",
+            "listed_date",
+            "issuance_cycle_count",
+            "version_change_note",
+            "project_participant",
+            "project_owner",
+            "project_developer",
+            "project_operator",
+            "crediting_period_years",
+            "crediting_period_start",
+            "crediting_period_end"
+          ],
+          "title": "Field Name",
+          "type": "string"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "missing_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_found",
+                "unsupported_by_baseline",
+                "ambiguous"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Missing Reason"
+        },
+        "normalized_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalized Value"
+        },
+        "raw_value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "validation_status": {
+          "const": "unvalidated",
+          "default": "unvalidated",
+          "title": "Validation Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field_name"
+      ],
+      "title": "FieldObservation",
+      "type": "object"
+    },
+    "Registry": {
+      "enum": [
+        "acr",
+        "gold_standard",
+        "verra"
+      ],
+      "title": "Registry",
+      "type": "string"
+    },
+    "ValidationInput": {
+      "additionalProperties": false,
+      "properties": {
+        "declared_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Version"
+        },
+        "document_type": {
+          "$ref": "#/$defs/DocumentType"
+        },
+        "report": {
+          "$ref": "#/$defs/ExtractionValidationReport"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source_document_id": {
+          "format": "uuid",
+          "title": "Source Document Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "report",
+        "source_document_id",
+        "document_type",
+        "sha256",
+        "declared_version",
+        "retrieved_at"
+      ],
+      "title": "ValidationInput",
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "review"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "authority_policy": {
+      "const": "manual-unresolved-v1",
+      "default": "manual-unresolved-v1",
+      "title": "Authority Policy",
+      "type": "string"
+    },
+    "canonical_writes": {
+      "const": 0,
+      "default": 0,
+      "title": "Canonical Writes",
+      "type": "integer"
+    },
+    "cross_document_comparison": {
+      "enum": [
+        "performed",
+        "not_possible"
+      ],
+      "title": "Cross Document Comparison",
+      "type": "string"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/ValidationInput"
+      },
+      "minItems": 1,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/ConsistencyIssue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "pipeline_run_id": {
+      "format": "uuid",
+      "title": "Pipeline Run Id",
+      "type": "string"
+    },
+    "project_id": {
+      "minLength": 1,
+      "title": "Project Id",
+      "type": "string"
+    },
+    "registry": {
+      "$ref": "#/$defs/Registry"
+    },
+    "rule_version": {
+      "const": "project-consistency-v1",
+      "default": "project-consistency-v1",
+      "title": "Rule Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "pipeline_run_id",
+    "project_id",
+    "registry",
+    "inputs",
+    "issues",
+    "cross_document_comparison"
+  ],
+  "title": "ProjectConsistencyReport",
+  "type": "object"
+}
