@@ -80,3 +80,16 @@ venv/bin/catchain score keywords PARSED_UUID
 - 成功run在结果JSON里，失败run完整持久化和Canonical数据库表还未实现。
 
 后续按进度表进入真实LLM抽取→验证→事实存储→评估→审核台，保持普通Workflow。
+
+## Slice 5开发检查点：LLM合同
+
+当前可运行离线边界检查：
+
+```bash
+venv/bin/python -m pytest tests/unit/extraction/test_llm_contract.py -q
+```
+
+这不是模型抽取命令；目前没有LLM CLI。下一步接入DeepSeek，密钥使用
+`DEEPSEEK_API_KEY`环境变量，不能写进代码、文档或聊天。API鉴权和实际小样本
+调用待验证。本机连接DeepSeek和GitHub成功，不代表所有Registry都已测试。
+详见Slice 5实施计划和第5课；当前页数/字符上限不等于Token或费用上限。

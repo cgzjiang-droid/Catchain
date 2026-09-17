@@ -14,7 +14,7 @@
 | 2 | Raw 导入、SHA-256、去重、版本、SQLite | 已完成 | 不可变原文件存储、本地导入服务、数据库、CLI |
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
-| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 未开始 | 等基线完成后比较 |
+| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 进行中 | Task 1合同/页面预算/引用检查完成；DeepSeek接入待实施 |
 | 6 | Evidence、领域、冲突验证和 Canonicalization | 未开始 | 已收集产品规则，待实现 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
@@ -55,7 +55,7 @@
 
 当前分支：`codex/slice-3-parsing-ocr`
 
-当前任务：Slice 5 规划检查点 — Provider-neutral与真实LLM结构化抽取。
+当前任务：Slice 5 Task 1已完成；下一步是版本化prompt、fake和DeepSeek adapter。
 
 Slice 4 已完成：
 
@@ -157,3 +157,12 @@ Slice 4 已完成：
 - 每份匹配1–10个观察字段（合同共55字段），存在不同候选；未做人工裁决或准确率评估。
 - 60测试、Ruff和7 Schema稳定再生成通过。旧版比较和额外company输出保存在忽略目录。
 - 失败run的持久化、事实/evidence/最终评分数据库表仍待后续阶段；JSON闭环不等于完整平台完成。
+
+## Slice 5 当前检查点
+
+- 已完成响应合同、显式选页和引用定位检查，6项新离线测试通过。
+- 实施计划：`docs/superpowers/plans/2026-09-17-slice-5-llm-extraction.md`。
+- 学习资料：`docs/learning/05-llm-extraction-boundary.md`。
+- 用户选择DeepSeek；本机服务器可达，但尚无DEEPSEEK_API_KEY，未做真实调用。
+- Prompt、adapter、调用缓存、失败持久化、费用记录和LLM CLI尚未实现。
+- 所有LLM候选保持unvalidated；Slice 6的语义/业务验证未提前宣称完成。
