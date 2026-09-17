@@ -56,6 +56,52 @@ review_app = typer.Typer(help="Record human decisions and explicitly approve gro
 app.add_typer(review_app, name="review")
 
 
+@score_app.command("readiness")
+def score_readiness_command(
+    registry: Annotated[Registry, typer.Option("--registry")],
+    project_id: Annotated[str, typer.Option("--project-id")],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted/readiness"),
+) -> None:
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from catchain.scoring.readiness import project_readiness
+
+    started = datetime.now(UTC)
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        result = project_readiness(
+            create_sqlite_engine(database), registry=registry, project_id=project_id
+        )
+        run = PipelineRun(
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest(),
+            config_hash=result["rules_sha256"],
+            started_at=started,
+            finished_at=datetime.now(UTC),
+        )
+        result["pipeline_run_id"] = str(run.pipeline_run_id)
+        path, stored, reused = store_baseline_artifact(output_dir, result, run)
+    except (ValueError, OSError, SQLAlchemyError):
+        _fail_parse("READINESS_FAILED", "canonical identity or readiness report storage failed")
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "approved_fact_count": len(result["facts"]),
+                "dimension_count": len(result["dimensions"]),
+                "methodology_scope": result["methodology_scope"],
+                "total_score": None,
+                "model_calls": 0,
+            }
+        )
+    )
+
+
 @review_app.command("decide")
 def review_decide_command(
     request_file: Annotated[Path, typer.Argument()],

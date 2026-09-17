@@ -232,3 +232,18 @@ evidence必须包含同版本PDF页码、原文quote、char_start/char_end（当
 同decision_id同输入重试复用；内容变化需新ID；审核期间正式值已变化则返回stale_current_fact。
 格式/证据失败返回status=draft和错误位置，将原输入保存至data/review/drafts，可用--draft-dir修改。
 修正草稿后再提交，失败不会留下正式值。所有审核文件和草稿均为私有、被Git忽略。
+
+## 10. 检查12维评分准备度
+
+```bash
+venv/bin/catchain score readiness --registry acr --project-id ACR125 \
+  --database data/parsed/slice6-facts-pilot-v2.sqlite
+```
+
+替换为自己的Registry/项目和数据库。数据库需有Slice 6表结构，本命令不创建或迁移表。
+输入只来自当前已批准正式事实，不使用未审核候选；输出私有不可变报告及处理run。
+报告每维列出input_fields、available_fields、missing_fields、fact_ids和待定义状态；facts保留证据链。
+methodology_scope只有已批准methodology_name严格为ACM0002时标明范围已确认，仍不是官方适用性认证。
+没有正式事实时列出缺失，不能把结果当作项目不合格；score/weight/total_score均为null。
+字段齐全也只标rubric_pending。此命令是准备度检查，不是最终评分；不联网、不调用模型。
+重复当前事实快照复用；新的正式版本产生新的报告，不覆盖旧快照。

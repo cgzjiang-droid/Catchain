@@ -20,6 +20,9 @@ human-review routing, conservative cross-field/version checks, and atomic SQLite
 candidate/evidence imports. Explicit human review can now append grounded canonical
 facts with immutable history and stale-write protection. No candidate is automatically
 approved. Domain policy completeness and accuracy against human gold remain pending.
+Slice 7 now audits approved facts against the legacy 12-dimension input catalog.
+Readiness reports preserve provenance; scoring rules, weights and totals remain
+unconfirmed. Readiness is not a project-quality score.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 

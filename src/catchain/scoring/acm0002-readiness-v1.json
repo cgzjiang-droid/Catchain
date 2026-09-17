@@ -1,0 +1,240 @@
+{
+  "policy_version": "acm0002-readiness-v1",
+  "methodology": "ACM0002",
+  "origin": "legacy_business_assets_not_official_methodology",
+  "source_hashes": {
+    "main.py": "7673f05eb0f62a033d20611df5763f47ca68dc9c9170dce5090c378c9bed83d9",
+    "field_mapping_acm0002_master.json": "d95eeab4a7fc5b25d2dad3c754bc2f0b52c4017716b2d643699b3d5880d28edb",
+    "method_table_acm0002_independent.json": "a3cdda07aae2e1abbb9a0911645d5befb0df90bc4592e0be8a870795a8adb4fa"
+  },
+  "weight_policy": "unconfirmed",
+  "dimensions": [
+    {
+      "dimension_id": "D01",
+      "name": "Grid-connected applicability",
+      "input_fields": [
+        "project_id",
+        "project_name",
+        "grid_connection_status",
+        "project_boundary_text"
+      ],
+      "legacy_definition": "Whether the project is demonstrably a grid-connected renewable electricity activity suitable for ACM0002.",
+      "legacy_rubric": {
+        "0": "Project is not grid-connected renewable electricity or clearly mismatched.",
+        "1": "Claimed as grid-connected but evidence is weak/indirect.",
+        "2": "Generally aligned with ACM0002 scope with minor ambiguity.",
+        "3": "Clearly grid-connected renewable project with direct documentary proof."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D02",
+      "name": "Technology eligibility under ACM0002",
+      "input_fields": [
+        "technology_type",
+        "installed_capacity_mw",
+        "renewable_resource_type"
+      ],
+      "legacy_definition": "Whether project technology type is within ACM0002-applicable renewable categories and consistently represented across records.",
+      "legacy_rubric": {
+        "0": "Technology is out-of-scope or inconsistent with claimed method.",
+        "1": "Technology claim exists but conflicts across documents.",
+        "2": "Technology mostly consistent with minor inconsistencies.",
+        "3": "Technology eligibility fully consistent across source documents."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D03",
+      "name": "Baseline construction integrity",
+      "input_fields": [
+        "baseline_scenario_text",
+        "baseline_formula_present",
+        "baseline_assumptions_table"
+      ],
+      "legacy_definition": "Whether baseline is explicitly and auditablely constructed as displaced grid electricity.",
+      "legacy_rubric": {
+        "0": "No valid baseline construction.",
+        "1": "Baseline described but formula/assumptions unclear.",
+        "2": "Baseline construction mostly valid with minor gaps.",
+        "3": "Baseline construction explicit, auditable, and fully traceable."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D04",
+      "name": "Grid emission factor chain",
+      "input_fields": [
+        "ef_value",
+        "ef_unit",
+        "ef_source_reference",
+        "ef_vintage_year"
+      ],
+      "legacy_definition": "Whether EF source, parameterization, and tool link are complete and reproducible.",
+      "legacy_rubric": {
+        "0": "EF source is wrong/missing.",
+        "1": "EF value exists but not reproducible.",
+        "2": "EF chain mostly documented with limited missing links.",
+        "3": "EF chain complete: source, tool reference, value, and reproducibility all clear."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D05",
+      "name": "Generation/export metering quality",
+      "input_fields": [
+        "electricity_generated_mwh",
+        "electricity_exported_mwh",
+        "meter_calibration_status",
+        "data_frequency"
+      ],
+      "legacy_definition": "Whether EG inputs are measured through calibrated and traceable metering and records.",
+      "legacy_rubric": {
+        "0": "No credible metering basis.",
+        "1": "Metering exists but major traceability defects.",
+        "2": "Metering is usable with some documentation gaps.",
+        "3": "Metering is calibrated, continuous, and fully traceable to source logs."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D06",
+      "name": "Project emissions (PE) treatment",
+      "input_fields": [
+        "pe_applicable_flag",
+        "pe_value_tco2e",
+        "pe_method_text"
+      ],
+      "legacy_definition": "Whether PE is correctly screened and quantified when required.",
+      "legacy_rubric": {
+        "0": "PE omitted or incorrectly handled.",
+        "1": "PE mentioned without sufficient support.",
+        "2": "PE treatment mostly correct with minor omissions.",
+        "3": "PE treatment complete and condition-consistent with clear traceability."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D07",
+      "name": "Leakage (LE) treatment",
+      "input_fields": [
+        "le_applicable_flag",
+        "le_value_tco2e",
+        "le_justification_text"
+      ],
+      "legacy_definition": "Whether leakage is explicitly justified or quantified consistent with ACM0002 conditions.",
+      "legacy_rubric": {
+        "0": "Leakage ignored where relevant.",
+        "1": "Leakage acknowledged but unjustified.",
+        "2": "Leakage treatment mostly adequate with minor gaps.",
+        "3": "Leakage fully justified/quantified with evidence chain."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D08",
+      "name": "ER formula reproducibility",
+      "input_fields": [
+        "be_value_tco2e",
+        "er_reported_tco2e",
+        "er_recalculated_tco2e",
+        "er_recalc_error_pct"
+      ],
+      "legacy_definition": "Whether ER = BE \u2212 PE \u2212 LE is internally consistent and independently recalculable.",
+      "legacy_rubric": {
+        "0": "Formula inconsistent or unreproducible.",
+        "1": "Formula present but major arithmetic/data inconsistencies.",
+        "2": "Recalculation broadly matches with limited discrepancy.",
+        "3": "Recalculation closely matches with full parameter traceability."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D09",
+      "name": "Additionality robustness",
+      "input_fields": [
+        "additionality_tool_used",
+        "investment_analysis_result",
+        "barrier_analysis_result",
+        "common_practice_result"
+      ],
+      "legacy_definition": "Whether additionality argument is structured and defensible against challenge.",
+      "legacy_rubric": {
+        "0": "No credible additionality defense.",
+        "1": "Additionality claimed but weakly evidenced.",
+        "2": "Structured additionality argument with unresolved weak points.",
+        "3": "Strong, tool-consistent additionality defense with full evidence support."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D10",
+      "name": "Monitoring architecture completeness",
+      "input_fields": [
+        "monitoring_parameters_listed",
+        "qa_qc_procedure_text",
+        "data_gap_procedure_text",
+        "archiving_period_years"
+      ],
+      "legacy_definition": "Whether monitoring parameters, frequency, QA/QC, and continuity controls are complete and operational.",
+      "legacy_rubric": {
+        "0": "Monitoring architecture absent/unusable.",
+        "1": "Monitoring framework exists but serious operational gaps.",
+        "2": "Monitoring framework mostly operational with minor weaknesses.",
+        "3": "Monitoring architecture complete, repeatable, and audit-ready."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D11",
+      "name": "Verification reproducibility and cycle consistency",
+      "input_fields": [
+        "validator_name",
+        "verifier_name",
+        "verification_period_start",
+        "verification_period_end",
+        "verification_cycle_count"
+      ],
+      "legacy_definition": "Whether validation/verification findings are reproducible across cycles and independent reviewers.",
+      "legacy_rubric": {
+        "0": "No credible verification basis.",
+        "1": "Single-cycle or inconsistent verification evidence.",
+        "2": "Verification mostly consistent with limited cross-cycle gaps.",
+        "3": "Validation/verification evidence is consistent and reproducible across cycles."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    },
+    {
+      "dimension_id": "D12",
+      "name": "Registry/version transition readiness",
+      "input_fields": [
+        "methodology_name",
+        "methodology_version",
+        "registered_date",
+        "listed_date",
+        "issuance_cycle_count",
+        "version_change_note"
+      ],
+      "legacy_definition": "Whether project can remain operable under registry packaging and methodology/version changes.",
+      "legacy_rubric": {
+        "0": "Registry/version handling fragile or missing.",
+        "1": "Basic handling with major documentation gaps.",
+        "2": "Portable handling with minor friction.",
+        "3": "Stable registry/version handling with clear transition evidence."
+      },
+      "weight": null,
+      "scoring_rule_status": "pending_business_confirmation"
+    }
+  ]
+}
