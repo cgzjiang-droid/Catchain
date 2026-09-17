@@ -11,8 +11,9 @@ audit, shared extraction contract and initial page-based scalar regex baseline
 (Tasks 1–2). Explicit title/company-role/crediting-period rules now emit schema
 1.1.0 candidates with processing-run IDs. The independent, versioned 12-dimension
 keyword baseline and CLI chain are implemented and compared with legacy outputs.
-Broader company assets and network adapters remain pending. Real LLM extraction
-is the next implementation slice.
+Broader company assets and network adapters remain pending. Slice 5 now includes a versioned prompt, a single-call DeepSeek JSON adapter,
+response/run logging, grounding checks and the llm-once CLI. One real pilot call
+has succeeded. Pre-call caching, pricing/budget controls and fair evaluation remain pending.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 
@@ -65,6 +66,7 @@ a non-default path.
 - [Lesson 2: Raw Ingestion, Hashing, and Versioning](docs/learning/02-raw-ingestion-versioning.md)
 - [Lesson 3: PDF Parsing, Quality Routing, and OCR Fallback](docs/learning/03-pdf-parsing-ocr-fallback.md)
 - [Lesson 4: Extraction and Keyword Baselines](docs/learning/04-extraction-keyword-baselines.md)
+- [Lesson 5: LLM Extraction Boundaries](docs/learning/05-llm-extraction-boundary.md)
 - [Hello-Agents chapter 1 learning lab](docs/learning/hello-agents/chapter-01-agent-basics.md)
 
 ## Baseline CLI chain

@@ -16,6 +16,7 @@ from catchain.domain.extraction import (
     ProjectExtraction,
 )
 from catchain.domain.parsing import ParsedDocument, ParsedPage
+from catchain.extraction.llm.providers import ProviderReply
 
 
 class ModelQuote(ImmutableDomainModel):
@@ -48,11 +49,19 @@ class ModelResponse(ImmutableDomainModel):
 class StructuredProvider(Protocol):
     """Adapter returns raw JSON; the workflow validates it independently."""
 
-    def extract(self, *, pages_json: str, schema: dict) -> str: ...
+    name: str
+    model: str
+
+    def extract(
+        self, *, system_prompt: str, input_json: str, max_output_tokens: int
+    ) -> ProviderReply: ...
 
 
 def select_pages(
-    parsed: ParsedDocument, page_numbers: tuple[int, ...], *, max_pages: int = 8,
+    parsed: ParsedDocument,
+    page_numbers: tuple[int, ...],
+    *,
+    max_pages: int = 8,
     max_characters: int = 24000,
 ) -> tuple[ParsedPage, ...]:
     """Explicit, sorted whole pages; fail rather than silently truncate source text."""
@@ -60,8 +69,9 @@ def select_pages(
         raise ValueError("page and character budgets must be positive")
     if not page_numbers or len(set(page_numbers)) != len(page_numbers):
         raise ValueError("select nonempty, unique pages")
-    if any(type(number) is not int or not 1 <= number <= len(parsed.pages)
-           for number in page_numbers):
+    if any(
+        type(number) is not int or not 1 <= number <= len(parsed.pages) for number in page_numbers
+    ):
         raise ValueError("selected page is outside document")
     if len(page_numbers) > max_pages:
         raise ValueError("page budget exceeded")
@@ -74,9 +84,16 @@ def select_pages(
 
 
 def ground_response(
-    response_json: str, parsed: ParsedDocument, *, selected_page_numbers: tuple[int, ...],
-    requested_fields: tuple[FieldName, ...], project_id: str, registry: Registry,
-    pipeline_run_id: UUID, extractor_name: str, extractor_version: str,
+    response_json: str,
+    parsed: ParsedDocument,
+    *,
+    selected_page_numbers: tuple[int, ...],
+    requested_fields: tuple[FieldName, ...],
+    project_id: str,
+    registry: Registry,
+    pipeline_run_id: UUID,
+    extractor_name: str,
+    extractor_version: str,
 ) -> ProjectExtraction:
     """Reject missing coverage and invented quotes; keep semantics unvalidated."""
     if not requested_fields or len(set(requested_fields)) != len(requested_fields):
@@ -97,22 +114,34 @@ def ground_response(
                 raise ValueError("evidence quote is absent from selected page")
             if text.find(quote.quote, start + 1) >= 0:
                 raise ValueError("evidence quote location is ambiguous; use a longer quote")
-            evidence.append(EvidenceRef(
-                document_version_id=parsed.document_version_id,
-                page_number=quote.page_number, quote=quote.quote,
-                char_start=start, char_end=start + len(quote.quote),
-            ))
-        observations.append(FieldObservation(
-            field_name=item.field_name, raw_value=item.raw_value,
-            normalized_value=item.normalized_value, unit=item.unit,
-            evidence=tuple(evidence), missing_reason=item.missing_reason,
-            issues=("semantic_validation_pending", "selected_pages_only"),
-        ))
+            evidence.append(
+                EvidenceRef(
+                    document_version_id=parsed.document_version_id,
+                    page_number=quote.page_number,
+                    quote=quote.quote,
+                    char_start=start,
+                    char_end=start + len(quote.quote),
+                )
+            )
+        observations.append(
+            FieldObservation(
+                field_name=item.field_name,
+                raw_value=item.raw_value,
+                normalized_value=item.normalized_value,
+                unit=item.unit,
+                evidence=tuple(evidence),
+                missing_reason=item.missing_reason,
+                issues=("semantic_validation_pending", "selected_pages_only"),
+            )
+        )
     return ProjectExtraction(
-        project_id=project_id, registry=registry,
+        project_id=project_id,
+        registry=registry,
         document_version_id=parsed.document_version_id,
         parsed_document_id=parsed.parsed_document_id,
-        extractor_name=extractor_name, extractor_version=extractor_version,
-        pipeline_run_id=pipeline_run_id, created_at=datetime.now(UTC),
+        extractor_name=extractor_name,
+        extractor_version=extractor_version,
+        pipeline_run_id=pipeline_run_id,
+        created_at=datetime.now(UTC),
         observations=tuple(observations),
     )

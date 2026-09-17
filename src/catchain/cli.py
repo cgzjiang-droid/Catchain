@@ -326,3 +326,64 @@ def score_keyword_baseline(
     output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted"),
 ) -> None:
     _run_baseline(parsed_document_id, database, output_dir)
+
+
+@extract_app.command("llm-once")
+def extract_llm_once(
+    parsed_document_id: Annotated[UUID, typer.Argument()],
+    pages: Annotated[list[int], typer.Option("--page", min=1)],
+    fields: Annotated[list[str], typer.Option("--field")],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted/llm"),
+    config_file: Annotated[Path, typer.Option("--config-file")] = Path(".env"),
+    model: Annotated[str, typer.Option("--model")] = "deepseek-flash",
+    max_output_tokens: Annotated[int, typer.Option("--max-output-tokens", min=1, max=4096)] = 1024,
+) -> None:
+    """One paid development call. No cache: repeating this command may incur cost."""
+    from catchain.extraction.llm.providers import DeepSeekProvider, ProviderError, read_deepseek_key
+    from catchain.extraction.llm.workflow import extract_one_call
+
+    repository = SqlAlchemyDocumentRepository(create_sqlite_engine(database))
+    parsed = repository.get_parsed(parsed_document_id)
+    if parsed is None:
+        _fail_parse("PARSED_DOCUMENT_NOT_FOUND", "Parsed document not found")
+    version = repository.get_version(parsed.document_version_id)
+    source = repository.get_source(version.source_document_id) if version else None
+    if source is None:
+        _fail_parse("SOURCE_NOT_FOUND", "Parsed document has no source identity")
+    try:
+        provider = DeepSeekProvider(api_key=read_deepseek_key(config_file), model=model)
+        artifact = extract_one_call(
+            parsed,
+            provider=provider,
+            page_numbers=tuple(pages),
+            requested_fields=tuple(fields),
+            project_id=source.registry_project_id,
+            registry=source.registry,
+            output_dir=output_dir,
+            max_output_tokens=max_output_tokens,
+        )
+    except (ProviderError, ValueError, OSError) as error:
+        message = (
+            str(error) if isinstance(error, ProviderError) else "invalid input or storage failed"
+        )
+        _fail_parse("LLM_EXTRACTION_FAILED", message)
+    result = json.loads(artifact.read_text())
+    response = json.loads((artifact.parent / "response.json").read_text())
+    typer.echo(
+        json.dumps(
+            {
+                "status": "stored",
+                "artifact_path": str(artifact),
+                "project_id": source.registry_project_id,
+                "registry": source.registry.value,
+                "pipeline_run_id": result["run"]["pipeline_run_id"],
+                "input_tokens": response["input_tokens"],
+                "output_tokens": response["output_tokens"],
+                "latency_seconds": response["latency_seconds"],
+                "estimated_cost": None,
+                "validation_status": "unvalidated",
+                "cache_enabled": False,
+            }
+        )
+    )

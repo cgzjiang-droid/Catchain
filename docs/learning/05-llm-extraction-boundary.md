@@ -25,3 +25,22 @@ https://api-docs.deepseek.com/zh-cn/guides/json_mode/
 
 Hello-Agents中的LLM、Prompt和Context Window在这里对应真实输入边界；当前仍是
 普通Workflow。API把文档文字交给模型，不要求模型自主浏览国外Registry。
+
+## 真实调用已接通：输入、推理与输出
+
+关键代码还包括providers.py、workflow.py和prompt-v1.txt。Workflow先选页，打包
+requested_fields、响应Schema和带页码的文字；provider把它发到DeepSeek。模型
+Inference是根据这些输入生成回答的过程，当前不是自主浏览或Agent决策。
+Prompt在版本控制中，规则明确禁止执行文档内的指令、猜公司角色或给总分。
+
+首次真实ACR125调用选第1页：输入1212、输出223 Token。输入不仅包含PDF文字，
+还包含Prompt、字段请求和Schema。模型从无标准字段标签的标题抽出了项目名与
+国家，两项角色明确弃答；Regex在这四项上没有候选。一个样本不能证明准确率。
+
+Structured Output执行路径：模型JSON→Pydantic→逐字引用定位→共享候选合同→
+私有结果文件。原始响应/失败仍存档，方便判断是模型、结构还是引用出了问题。
+保留confidence=null；不把模型自信当可靠概率。
+
+面试可能问：“为什么没有加RAG或Agent？”此样本单页直接输入可以完成抽取，
+没有检索需求或模型自主选工具的需求。下一步先解决重复调用成本和评估，再决定
+是否需要检索；不根据文件长度猜测模型过载。

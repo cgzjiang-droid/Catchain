@@ -4,7 +4,7 @@
 
 当前已实现本地PDF导入、SHA-256去重、文档版本、逐页解析、OCR分流、Regex候选
 抽取与12维关键词Baseline。SQLite保存文档与Parsed页面；抽取/评分候选和成功
-run记录保存为不可变JSON。真实LLM、事实验证、最终评分、审核台与联网抓取待开发。
+run记录保存为不可变JSON。真实LLM单次抽取已接入；调用缓存/费用控制、事实验证、最终评分、审核台与联网抓取待开发。
 完整进度见 [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md)。
 
 ## 安装与检查
@@ -81,19 +81,35 @@ venv/bin/catchain score keywords PARSED_UUID
 
 后续按进度表进入真实LLM抽取→验证→事实存储→评估→审核台，保持普通Workflow。
 
-## Slice 5开发检查点：LLM合同
+## 4. DeepSeek单次开发抽取
 
-当前可运行离线边界检查：
+先设置DEEPSEEK_API_KEY环境变量，或在项目根目录.env保存该键（本机已配置，
+Git忽略、权限600）。环境变量优先；--config-file可指定本地配置。密钥不发聊天，
+不写进代码或提交记录。没有额外dotenv依赖，也不会执行.env内容。
 
 ```bash
-venv/bin/python -m pytest tests/unit/extraction/test_llm_contract.py -q
+venv/bin/catchain extract llm-once PARSED_UUID \
+  --page 1 --field project_name --field country \
+  --database data/catchain.sqlite
 ```
 
-这不是模型抽取命令；目前没有LLM CLI。下一步接入DeepSeek，密钥使用
-`DEEPSEEK_API_KEY`环境变量，不能写进代码、文档或聊天。API鉴权和实际小样本
-抽取调用待验证。本机DeepSeek GET /models鉴权成功，不代表所有Registry都已测试。
-详见Slice 5实施计划和第5课；当前页数/字符上限不等于Token或费用上限。
+替换PARSED_UUID。--page、--field可重复指定；字段使用共享合同中的名称。
+项目和Registry直接从数据库来源读取。默认deepseek-flash，可用--model选择
+明确支持的deepseek-v4-pro。默认输出上限1024 Token，--max-output-tokens最大4096。
+选页最多8页/24000字符，页面完整保留；超限失败，不悄悄截断。
 
-本机API密钥已通过隐藏输入框存入项目根目录.env，权限600，Git忽略。
-当前CLI尚不自动加载该文件；后续adapter接入时增加配置读取。密钥配置完成
-不等于真实抽取完成，GET /models成功也不验证余额或模型抽取能力。
+**当前llm-once没有调用前缓存，每次执行都可能计费；不要用它批量重跑。**
+每次最多一次模型调用、零自动retry。API空响应、截断、非法JSON或假引用会失败。
+输出artifact_path指向私有run目录中的result.json。started.json和response.json保存
+输入身份/配置哈希、模型原始响应、tokens和延迟；失败保存failed.json。
+结果仍unvalidated，不写Canonical事实，不生成最终业务评分。
+
+estimated_cost当前为null，表示价格尚未配置，不是免费。调用前缓存、明确价格、
+货币预算和受控retry是下一Task。Token是模型计量单位，字符预算不是精确Token预算。
+首次真实调用验证见docs/validation/2026-09-17-slice-5-first-real-call.md。
+
+离线测试不会联网或计费：
+
+```bash
+venv/bin/python -m pytest tests/unit/extraction tests/integration/test_llm_cli.py -q
+```

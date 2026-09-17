@@ -14,7 +14,7 @@
 | 2 | Raw 导入、SHA-256、去重、版本、SQLite | 已完成 | 不可变原文件存储、本地导入服务、数据库、CLI |
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
-| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 进行中 | Task 1合同/页面预算/引用检查完成；DeepSeek接入待实施 |
+| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 进行中 | Task 2真实DeepSeek单次抽取完成；调用前缓存/费用控制待实施 |
 | 6 | Evidence、领域、冲突验证和 Canonicalization | 未开始 | 已收集产品规则，待实现 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
@@ -55,7 +55,7 @@
 
 当前分支：`codex/slice-3-parsing-ocr`
 
-当前任务：Slice 5 Task 1已完成；下一步是版本化prompt、fake和DeepSeek adapter。
+当前任务：Slice 5 Task 2已完成，并接入llm-once CLI；下一步Task 3缓存和费用控制。
 
 Slice 4 已完成：
 
@@ -163,12 +163,20 @@ Slice 4 已完成：
 - 已完成响应合同、显式选页和引用定位检查，6项新离线测试通过。
 - 实施计划：`docs/superpowers/plans/2026-09-17-slice-5-llm-extraction.md`。
 - 学习资料：`docs/learning/05-llm-extraction-boundary.md`。
-- 用户选择DeepSeek；本机API鉴权成功，本地.env已配置（Git忽略、权限600）；未做付费抽取调用。
-- Prompt、adapter、调用缓存、失败持久化、费用记录和LLM CLI尚未实现。
+- 用户选择DeepSeek；本机API鉴权成功，本地.env已配置（Git忽略、权限600）；已完成一次真实抽取。
+- Prompt、DeepSeek adapter、单次CLI和成功/失败run文件已实现；调用前缓存、费用上限仍待实施。
 - 所有LLM候选保持unvalidated；Slice 6的语义/业务验证未提前宣称完成。
 
 ### DeepSeek API配置检查点
 
 本地.env保存DEEPSEEK_API_KEY（不上传），权限600。GET /models鉴权成功，
-返回deepseek-flash、deepseek-v4-pro。未调用生成接口；这不证明抽取质量或余额充足。
-后续adapter必须读取环境变量或本地配置，不能假设当前.env已被CLI自动加载。
+返回deepseek-flash、deepseek-v4-pro。随后以deepseek-flash完成一次生成抽取。
+llm-once已读取环境变量或本地.env；优先环境变量，不执行配置内容。
+
+### Slice 5 Task 2验收
+
+- DeepSeek真实抽取ACR125第1页，4字段中2候选、2明确弃答，引用均可定位。
+- 输入1212、输出223 Token、耗时约1.60秒。结果仍unvalidated，不报告准确率。
+- 75项测试、Ruff和wheel构建通过；成功/失败记录与原始响应保留在私有目录。
+- 验证报告：`docs/validation/2026-09-17-slice-5-first-real-call.md`。
+- Task 3未完成：llm-once无缓存，重复可能计费；费用未知null，尚无货币预算。

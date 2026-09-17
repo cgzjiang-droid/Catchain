@@ -8,7 +8,7 @@
   - 精确覆盖请求字段，允许同字段多个候选。JSON/Pydantic失败即拒绝。
   - 引用必须在选中页唯一出现；不猜位置，不静默截断页面。
   - 候选保留unvalidated和语义待验证；不进入正式事实库。
-- [ ] Task 2：版本化prompt、离线fake adapter及DeepSeek JSON Output adapter。
+- [x] Task 2：版本化prompt、离线fake adapter及DeepSeek JSON Output adapter。
   - API空content、截断、网络/鉴权错误明确区分；密钥只读环境变量。
   - Protocol返回原始JSON，解析/验证由独立workflow负责。
 - [ ] Task 3：调用前缓存、run/call记录、tokens/延迟/成本和有界retry。
@@ -29,4 +29,11 @@
 2026-09-17：本机访问api.deepseek.com收到HTTP 401，参考GitHub页面HTTP 200。
 这仅证明两个站点网络可达，不代表Registry全部可达、API账号有余额或模型调用成功。
 本地.env已保存DEEPSEEK_API_KEY，Git忽略、权限600；GET /models鉴权成功。
-返回deepseek-flash、deepseek-v4-pro。生成抽取、tokens/费用记录、缓存和CLI仍待实施。
+返回deepseek-flash、deepseek-v4-pro。已完成一次生成抽取及llm-once CLI；Token/延迟与成功/失败run记录已落盘。
+调用前缓存、价格与费用控制、固定同输入样本对比尚待实施。
+
+## Task 2验收
+
+75测试、Ruff、wheel构建通过。真实ACR125第1页四字段请求成功，2候选/2弃答。
+见`docs/validation/2026-09-17-slice-5-first-real-call.md`。Task 4的CLI部分提前完成，
+但完整对比验收未完成。llm-once每次调用可能计费，零自动retry，不是批量入口。
