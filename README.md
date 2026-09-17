@@ -23,6 +23,9 @@ approved. Domain policy completeness and accuracy against human gold remain pend
 Slice 7 now audits approved facts against the legacy 12-dimension input catalog.
 Readiness reports preserve provenance; scoring rules, weights and totals remain
 unconfirmed. Readiness is not a project-quality score.
+Optional human-attested assessment context now binds version and measurement periods
+to exact approved facts. Business checks produce blocked reasons or a legacy ER
+arithmetic diagnostic; official applicability, scoring rubrics and tolerances remain pending.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 

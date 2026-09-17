@@ -14,11 +14,13 @@ from catchain.domain import (
     ProjectExtraction,
     SourceDocument,
 )
+from catchain.domain.assessment import AssessmentContext
 from catchain.domain.consistency import ProjectConsistencyReport
 from catchain.domain.review import ReviewRequest
 from catchain.domain.validation import ExtractionValidationReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
+    "assessment-context": AssessmentContext,
     "review-request": ReviewRequest,
     "extraction-validation-report": ExtractionValidationReport,
     "document-version": DocumentVersion,

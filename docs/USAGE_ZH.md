@@ -247,3 +247,29 @@ methodology_scope只有已批准methodology_name严格为ACM0002时标明范围�
 没有正式事实时列出缺失，不能把结果当作项目不合格；score/weight/total_score均为null。
 字段齐全也只标rubric_pending。此命令是准备度检查，不是最终评分；不联网、不调用模型。
 重复当前事实快照复用；新的正式版本产生新的报告，不覆盖旧快照。
+
+## 11. 方法学、周期与算术检查
+
+```bash
+venv/bin/catchain score checks READINESS_ARTIFACT --database data/catchain.sqlite
+```
+
+READINESS_ARTIFACT来自score readiness的artifact_path。没有上下文时仍会保存阻止原因报告。
+当前正式事实已改变时旧报告会被拒绝，请重新生成readiness；报告被修改也会拒绝。
+
+人工确认后，可用--context-file data/review/assessment-context.json提供上下文。
+合同见schemas/generated/assessment-context.schema.json：
+
+- reviewer/reason：实际负责人和明确理由；authority_confirmed：来源权威是否已确认。
+- methodology_fact_id/methodology_version_fact_id：准备度facts中对应正式事实的ID。
+- period_start/period_end：完整YYYY-MM-DD起止日期，不能颠倒。
+- period_fact_ids：把electricity_generated_mwh、electricity_exported_mwh、be_value_tco2e、pe_value_tco2e、le_value_tco2e、er_reported_tco2e中实际要比较的字段映射为其正式fact_id。
+- evidence：支持周期与版本/权威判断的EvidenceRef数组，包含原版本、页码、quote和字符位置。
+
+程序验证上下文引用位于本项目当前正式事实的Parsed来源中；引用语义与权威需人工确认。
+这是单机可信操作员输入，不是审核账号认证，不是自动官方方法学版本白名单。
+
+减排量诊断要求BE/PE/LE/ER四个正式值都有周期绑定、非负有限数值且单位tCO2e。
+输出BE-PE-LE、报告值减复算值、绝对差异/报告值百分比（报告值0时null），只作为历史代数诊断。
+不会自动判合规、不会给0–3分、不会写入正式事实。旧Rubric、容差、权重和官方版本仍需确认。
+上下文和报告保存私有位置，重复输入复用；--output-dir可设置检查报告目录。

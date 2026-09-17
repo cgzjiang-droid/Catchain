@@ -102,6 +102,81 @@ def score_readiness_command(
     )
 
 
+@score_app.command("checks")
+def score_checks_command(
+    readiness_artifact: Annotated[Path, typer.Argument()],
+    context_file: Annotated[Path | None, typer.Option("--context-file")] = None,
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path(
+        "data/extracted/business-checks"
+    ),
+) -> None:
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from catchain.domain.assessment import AssessmentContext
+    from catchain.scoring.business_checks import check_business_inputs
+    from catchain.scoring.readiness import project_readiness
+
+    started = datetime.now(UTC)
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        bundle = json.loads(readiness_artifact.read_text(encoding="utf-8"))
+        prior = PipelineRun.model_validate(bundle["run"])
+        readiness = bundle["result"]
+        stable = {k: v for k, v in readiness.items() if k != "pipeline_run_id"}
+        engine = create_sqlite_engine(database)
+        current = project_readiness(
+            engine, registry=Registry(readiness["registry"]), project_id=readiness["project_id"]
+        )
+        if (
+            prior.status != RunStatus.SUCCEEDED
+            or prior.stage != PipelineStage.EVALUATED
+            or readiness["pipeline_run_id"] != str(prior.pipeline_run_id)
+            or prior.input_hash
+            != hashlib.sha256(json.dumps(stable, sort_keys=True).encode()).hexdigest()
+            or prior.config_hash != readiness["rules_sha256"]
+            or stable != current
+        ):
+            raise ValueError("stale or modified readiness snapshot")
+        context = (
+            AssessmentContext.model_validate_json(context_file.read_text(encoding="utf-8"))
+            if context_file
+            else None
+        )
+        result = check_business_inputs(
+            readiness, context=context, documents=SqlAlchemyDocumentRepository(engine)
+        )
+        run = PipelineRun(
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest(),
+            config_hash=hashlib.sha256(result["policy_version"].encode()).hexdigest(),
+            started_at=started,
+            finished_at=datetime.now(UTC),
+        )
+        result["pipeline_run_id"] = str(run.pipeline_run_id)
+        path, stored, reused = store_baseline_artifact(output_dir, result, run)
+    except (ValueError, OSError, SQLAlchemyError, KeyError, TypeError):
+        _fail_parse(
+            "BUSINESS_CHECKS_FAILED",
+            "invalid context or stale readiness; regenerate readiness if current facts changed",
+        )
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "gate_codes": sorted({g["code"] for g in result["gates"]}),
+                "er_diagnostic_status": result["er_diagnostic"]["status"],
+                "total_score": None,
+                "model_calls": 0,
+            }
+        )
+    )
+
+
 @review_app.command("decide")
 def review_decide_command(
     request_file: Annotated[Path, typer.Argument()],
