@@ -137,6 +137,83 @@ def test_llm_cli_import_parse_and_extract_uses_source_identity(tmp_path, monkeyp
     validated = runner.invoke(app, validation_args)
     assert validated.exit_code == 0, validated.exception
     validation_info = json.loads(validated.stdout)
+    store_args = [
+        "store",
+        "validation",
+        validation_info["artifact_path"],
+        "--extraction-artifact",
+        info["artifact_path"],
+        "--database",
+        str(database),
+    ]
+    stored = runner.invoke(app, store_args)
+    assert stored.exit_code == 0, stored.exception
+    assert json.loads(stored.stdout)["status"] == "stored"
+    repeated_store = runner.invoke(app, store_args)
+    assert repeated_store.exit_code == 0, repeated_store.exception
+    assert json.loads(repeated_store.stdout)["status"] == "reused"
+    from uuid import UUID
+
+    import pytest
+    from sqlalchemy import func, select
+
+    from catchain.domain import PipelineRun
+    from catchain.domain.validation import ExtractionValidationReport
+    from catchain.storage.database import canonical_facts, create_sqlite_engine, fact_candidates
+    from catchain.storage.fact_repository import SqlAlchemyFactRepository
+
+    engine = create_sqlite_engine(database)
+    repository = SqlAlchemyFactRepository(engine)
+    saved_report = repository.get_validation(UUID(validation_info["pipeline_run_id"]))
+    bundle = json.loads(Path(validation_info["artifact_path"]).read_text())
+    assert saved_report == ExtractionValidationReport.model_validate(bundle["result"])
+    modified = saved_report.model_copy(update={"validator_version": "changed"})
+    with pytest.raises(ValueError, match="immutable"):
+        from catchain.domain import ProjectExtraction
+
+        repository.import_validation(
+            modified,
+            PipelineRun.model_validate(bundle["run"]),
+            ProjectExtraction.model_validate(artifact["result"]),
+            PipelineRun.model_validate(artifact["run"]),
+        )
+    with engine.connect() as connection:
+        assert (
+            connection.execute(select(func.count()).select_from(fact_candidates)).scalar_one() == 1
+        )
+        assert (
+            connection.execute(select(func.count()).select_from(canonical_facts)).scalar_one() == 0
+        )
+    from uuid import uuid4
+
+    from sqlalchemy import event
+
+    new_id = uuid4()
+    new_report = saved_report.model_copy(update={"pipeline_run_id": new_id})
+    new_run = PipelineRun.model_validate(bundle["run"]).model_copy(
+        update={"pipeline_run_id": new_id}
+    )
+
+    def fail_evidence(_connection, _cursor, statement, _parameters, _context, _many):
+        if statement.startswith("INSERT INTO candidate_evidence"):
+            raise RuntimeError("simulated storage failure")
+
+    event.listen(engine, "before_cursor_execute", fail_evidence)
+    try:
+        with pytest.raises(RuntimeError, match="simulated"):
+            repository.import_validation(
+                new_report,
+                new_run,
+                ProjectExtraction.model_validate(artifact["result"]),
+                PipelineRun.model_validate(artifact["run"]),
+            )
+    finally:
+        event.remove(engine, "before_cursor_execute", fail_evidence)
+    assert repository.get_validation(new_id) is None
+    with engine.connect() as connection:
+        assert (
+            connection.execute(select(func.count()).select_from(fact_candidates)).scalar_one() == 1
+        )
     assert validation_info["counts"] == {"missing": 0, "rejected": 0, "needs_review": 1}
     assert validation_info["canonical_writes"] == 0 and len(calls) == 1
     validation_report = json.loads(Path(validation_info["artifact_path"]).read_text())

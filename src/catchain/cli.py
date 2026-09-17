@@ -50,6 +50,51 @@ app.add_typer(extract_app, name="extract")
 app.add_typer(score_app, name="score")
 app.add_typer(compare_app, name="compare")
 app.add_typer(validate_app, name="validate")
+store_app = typer.Typer(help="Persist validated candidates without canonical promotion.")
+app.add_typer(store_app, name="store")
+
+
+@store_app.command("validation")
+def store_validation_command(
+    validation_artifact: Annotated[Path, typer.Argument()],
+    extraction_artifact: Annotated[Path, typer.Option("--extraction-artifact")],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+) -> None:
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from catchain.domain.validation import ExtractionValidationReport
+    from catchain.storage.fact_repository import SqlAlchemyFactRepository
+
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        bundle = json.loads(validation_artifact.read_text(encoding="utf-8"))
+        report = ExtractionValidationReport.model_validate(bundle["result"])
+        run = PipelineRun.model_validate(bundle["run"])
+        original = json.loads(extraction_artifact.read_text(encoding="utf-8"))
+        extraction = ProjectExtraction.model_validate(original["result"])
+        extraction_run = PipelineRun.model_validate(original["run"])
+        engine = create_sqlite_engine(database)
+        create_schema(engine)
+        reused = SqlAlchemyFactRepository(engine).import_validation(
+            report, run, extraction, extraction_run
+        )
+    except (ValueError, OSError, KeyError, TypeError, SQLAlchemyError):
+        _fail_parse(
+            "STORE_VALIDATION_FAILED", "validation identity, evidence or database import failed"
+        )
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "pipeline_run_id": str(run.pipeline_run_id),
+                "candidate_count": len(report.checks),
+                "evidence_count": sum(len(c.observation.evidence) for c in report.checks),
+                "canonical_writes": 0,
+                "model_calls": 0,
+            }
+        )
+    )
 
 
 @schema_app.command("export")

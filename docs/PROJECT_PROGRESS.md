@@ -15,12 +15,23 @@
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
 | 5 | Provider-neutral 与真实 LLM 结构化抽取 | 开发闭环完成 | 真实DeepSeek、缓存/运行记录、同页Regex比较；未认证准确率 |
-| 6 | Evidence、领域、冲突验证和 Canonicalization | 进行中 | Task 1机械验证/审核分流完成；跨字段与正式事实库待实施 |
+| 6 | Evidence、领域、冲突验证和 Canonicalization | 进行中 | Task 1–3完成：机械验证、差异报告、SQLite候选/证据；Task 4人工裁决与正式值写入待实施 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
 | 9 | Review Agent | 未开始 | 仅在前置质量条件满足后进入 |
 
 ## 已完成工作
+
+### Slice 6 当前检查点：Task 3
+
+新增6张独立表：processing_runs、validation_reports、fact_candidates、candidate_evidence、review_decisions、canonical_facts。
+store validation要求原始抽取与验证两个artifact，核对项目/文档/页码/run，事务保存候选、证据与完整原抽取。
+同一run完全相同则复用，变更拒绝覆盖；模拟证据写入失败验证整体回滚。
+外键启用，Alembic 0003与运行时表定义一致；旧来源记录经升级/降级测试保持。
+真实ACR125在原数据库备份上导入4条候选记录（含2条缺失）、2条证据、0条正式事实、0次模型调用。
+review_decisions与canonical_facts本步只有表定义，没有审核或正式写入入口。
+一致性报告仍保存在独立JSON审计文件，本步数据库导入范围为单抽取的机械验证报告。
+下一步Task 4：审核人、理由、原证据、修改前后值、UNRESOLVED、草稿错误位置与幂等性。
 
 ### Slice 1：Domain Foundation
 

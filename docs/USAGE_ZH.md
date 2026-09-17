@@ -162,3 +162,29 @@ missing表示明确弃答；rejected表示机械错误，原值仍保留；needs
 
 报告run的succeeded仅代表验证处理已完成，不代表每个候选通过或允许上线。
 重复执行复用不可变报告与run，--output-dir可以自定义私有位置。
+
+## 7. 跨字段与来源差异检查
+
+```bash
+venv/bin/catchain validate project VALIDATION_A VALIDATION_B --database data/catchain.sqlite
+```
+
+输入同一项目的机械验证报告。保留差异候选和来源版本，状态为unresolved；不自动选新版。
+真实多文档验收尚未完成。完整说明见docs/validation/2026-09-17-slice-6-consistency.md。
+
+## 8. 把验证候选与证据存入数据库
+
+```bash
+venv/bin/catchain store validation VALIDATION_ARTIFACT \
+  --extraction-artifact EXTRACTION_ARTIFACT --database data/catchain.sqlite
+```
+
+VALIDATION_ARTIFACT为validate extraction输出，EXTRACTION_ARTIFACT为对应Regex/LLM原抽取输出。
+项目原数据库必须存在，且保存了所引用的Parsed/版本/来源；首次执行添加缺少的新表。
+先备份重要数据库。本命令采用create_all添加表，不为旧库自动stamp Alembic版本。
+已由Alembic维护的数据库可配置alembic.ini的sqlalchemy.url后执行venv/bin/alembic upgrade head。
+旧create_all数据库不要直接运行全量初始迁移；需先核对现有结构并制定迁移基线。
+
+输出candidate_count包括缺失记录。所有原候选、问题和证据保留；每次导入是完整事务。
+重复同一run复用；同一run内容变更拒绝。canonical_writes与model_calls均为0。
+本步无审核裁决入口，不可直接把候选表当正式事实。数据库及运行artifact不上传GitHub。
