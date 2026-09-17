@@ -15,9 +15,11 @@ from catchain.domain import (
     SourceDocument,
 )
 from catchain.domain.consistency import ProjectConsistencyReport
+from catchain.domain.review import ReviewRequest
 from catchain.domain.validation import ExtractionValidationReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
+    "review-request": ReviewRequest,
     "extraction-validation-report": ExtractionValidationReport,
     "document-version": DocumentVersion,
     "evidence-ref": EvidenceRef,

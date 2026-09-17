@@ -17,8 +17,9 @@ has succeeded. Completed-input caching and opt-in pricing/budget controls are in
 fixed-page Regex/LLM candidate comparison is available. Accuracy against human gold
 labels remain pending. Slice 6 now includes mechanical candidate checks and explicit
 human-review routing, conservative cross-field/version checks, and atomic SQLite
-candidate/evidence imports. Review and canonical tables exist; human decision and
-canonical promotion commands remain pending. No candidate is automatically approved.
+candidate/evidence imports. Explicit human review can now append grounded canonical
+facts with immutable history and stale-write protection. No candidate is automatically
+approved. Domain policy completeness and accuracy against human gold remain pending.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 

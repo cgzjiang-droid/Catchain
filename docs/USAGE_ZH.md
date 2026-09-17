@@ -188,3 +188,47 @@ VALIDATION_ARTIFACT为validate extraction输出，EXTRACTION_ARTIFACT为对应Re
 输出candidate_count包括缺失记录。所有原候选、问题和证据保留；每次导入是完整事务。
 重复同一run复用；同一run内容变更拒绝。canonical_writes与model_calls均为0。
 本步无审核裁决入口，不可直接把候选表当正式事实。数据库及运行artifact不上传GitHub。
+
+以上是Task 3边界；Task 4现已提供以下明确审核入口。
+
+## 9. 人工裁决与正式事实
+
+先获取候选ID、原值/证据和当前正式版本：
+
+```bash
+venv/bin/catchain review candidates VALIDATION_RUN_ID --database data/catchain.sqlite
+```
+
+VALIDATION_RUN_ID来自store validation输出。创建私有裁决JSON，示例为无法确定：
+
+```json
+{
+  "decision_id": "替换为新UUID，重试时保留",
+  "candidate_id": "替换为候选ID",
+  "reviewer": "实际审核人",
+  "reason": "证据不足，无法确认权威来源",
+  "status": "unresolved",
+  "expected_current_fact_id": null
+}
+```
+
+expected_current_fact_id使用候选查询返回值；已有正式值时必须填对应ID。
+decision_id可通过venv/bin/python -c 'import uuid; print(uuid.uuid4())'生成。
+
+```bash
+venv/bin/catchain review decide data/review/my-decision.json --database data/catchain.sqlite
+```
+
+拒绝候选使用status=rejected。两种状态都不填after，不改已有正式事实。
+批准使用status=approved、authority_confirmed=true，并填after为完整FieldObservation。
+可复制候选查询的check.observation，人工修正raw_value、normalized_value、unit和对应证据。
+evidence必须包含同版本PDF页码、原文quote、char_start/char_end（当前页面中的字符位置），不能只改值而保留无关证据。
+修改来自新文档时先对新版本重新解析/抽取/验证/入库，审核新候选；不能拿旧候选冒充新来源。
+
+批准重新检查类型、完整日期、单位和引用位置，并核对已有计入期起止日期顺序。
+没有定义的字段合同、单位未确认或模糊日期不能通过本入口强行批准。
+语义和来源权威由审核员确认；系统不具备自动权威判断或审核账号认证。
+首次批准写入正式历史，修改追加新版本；原候选、旧正式值、理由和修订证据全部保留。
+同decision_id同输入重试复用；内容变化需新ID；审核期间正式值已变化则返回stale_current_fact。
+格式/证据失败返回status=draft和错误位置，将原输入保存至data/review/drafts，可用--draft-dir修改。
+修正草稿后再提交，失败不会留下正式值。所有审核文件和草稿均为私有、被Git忽略。

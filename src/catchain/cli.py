@@ -52,6 +52,124 @@ app.add_typer(compare_app, name="compare")
 app.add_typer(validate_app, name="validate")
 store_app = typer.Typer(help="Persist validated candidates without canonical promotion.")
 app.add_typer(store_app, name="store")
+review_app = typer.Typer(help="Record human decisions and explicitly approve grounded facts.")
+app.add_typer(review_app, name="review")
+
+
+@review_app.command("decide")
+def review_decide_command(
+    request_file: Annotated[Path, typer.Argument()],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    draft_dir: Annotated[Path, typer.Option("--draft-dir")] = Path("data/review/drafts"),
+) -> None:
+    from pydantic import ValidationError
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from catchain.domain.review import ReviewRequest
+    from catchain.storage.review_repository import ReviewBlocked, decide
+
+    raw = ""
+    try:
+        raw = request_file.read_text(encoding="utf-8")
+        request = ReviewRequest.model_validate_json(raw)
+        if not database.is_file():
+            raise ReviewBlocked(["source_database_absent"])
+        engine = create_sqlite_engine(database)
+        create_schema(engine)
+        outcome = decide(engine, request)
+    except (ValidationError, ReviewBlocked, OSError, SQLAlchemyError) as error:
+        if isinstance(error, ValidationError):
+            errors = [
+                {"loc": list(e["loc"]), "code": e["type"], "message": e["msg"]}
+                for e in error.errors(include_input=False, include_context=False)
+            ]
+        elif isinstance(error, ReviewBlocked):
+            errors = [
+                {
+                    "loc": ["after"]
+                    if code.startswith(("evidence_", "date_", "unit_", "field_", "numeric_"))
+                    else [],
+                    "code": code,
+                }
+                for code in error.codes
+            ]
+        else:
+            errors = [{"loc": [], "code": "review_storage_failed"}]
+        draft_dir.mkdir(parents=True, exist_ok=True)
+        path = draft_dir / f"{uuid4()}.json"
+        path.write_text(
+            json.dumps(
+                {"raw_request": raw, "errors": errors, "canonical_writes": 0},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        typer.echo(
+            json.dumps(
+                {
+                    "status": "draft",
+                    "draft_path": str(path),
+                    "errors": errors,
+                    "canonical_writes": 0,
+                    "model_calls": 0,
+                }
+            )
+        )
+        raise typer.Exit(code=1) from None
+    typer.echo(json.dumps({**outcome, "decision_id": str(request.decision_id), "model_calls": 0}))
+
+
+@review_app.command("candidates")
+def review_candidates_command(
+    validation_run_id: Annotated[UUID, typer.Argument()],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+) -> None:
+    from sqlalchemy import select
+
+    from catchain.domain.validation import ExtractionValidationReport
+    from catchain.storage.database import canonical_heads, fact_candidates, validation_reports
+
+    engine = create_sqlite_engine(database)
+    with engine.connect() as connection:
+        row = (
+            connection.execute(
+                select(validation_reports).where(
+                    validation_reports.c.pipeline_run_id == str(validation_run_id)
+                )
+            )
+            .mappings()
+            .one_or_none()
+        )
+        if row is None:
+            _fail_parse("REPORT_ABSENT", "validation report not imported")
+        report = ExtractionValidationReport.model_validate_json(row["payload_json"])
+        candidates = (
+            connection.execute(
+                select(fact_candidates)
+                .where(fact_candidates.c.validation_run_id == str(validation_run_id))
+                .order_by(fact_candidates.c.observation_index)
+            )
+            .mappings()
+            .all()
+        )
+        result = []
+        for candidate in candidates:
+            current = connection.execute(
+                select(canonical_heads.c.fact_id).where(
+                    canonical_heads.c.registry == row["registry"],
+                    canonical_heads.c.project_id == row["project_id"],
+                    canonical_heads.c.field_name == candidate["field_name"],
+                )
+            ).scalar_one_or_none()
+            result.append(
+                {
+                    "candidate_id": candidate["candidate_id"],
+                    "expected_current_fact_id": current,
+                    "check": report.checks[candidate["observation_index"]].model_dump(mode="json"),
+                }
+            )
+    typer.echo(json.dumps({"candidates": result, "model_calls": 0}, ensure_ascii=False))
 
 
 @store_app.command("validation")

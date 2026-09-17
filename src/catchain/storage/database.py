@@ -195,6 +195,24 @@ canonical_facts = Table(
 )
 
 
+review_requests = Table(
+    "review_requests",
+    metadata,
+    Column("decision_id", String(36), ForeignKey("review_decisions.decision_id"), primary_key=True),
+    Column("payload_json", Text, nullable=False),
+)
+canonical_heads = Table(
+    "canonical_heads",
+    metadata,
+    Column("registry", String(32), primary_key=True),
+    Column("project_id", String, primary_key=True),
+    Column("field_name", String, primary_key=True),
+    Column(
+        "fact_id", String(36), ForeignKey("canonical_facts.fact_id"), nullable=False, unique=True
+    ),
+)
+
+
 def create_sqlite_engine(database_path: Path) -> Engine:
     """Create an engine for one file-backed SQLite database."""
 

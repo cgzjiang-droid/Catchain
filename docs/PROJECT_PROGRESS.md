@@ -15,12 +15,25 @@
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
 | 5 | Provider-neutral 与真实 LLM 结构化抽取 | 开发闭环完成 | 真实DeepSeek、缓存/运行记录、同页Regex比较；未认证准确率 |
-| 6 | Evidence、领域、冲突验证和 Canonicalization | 进行中 | Task 1–3完成：机械验证、差异报告、SQLite候选/证据；Task 4人工裁决与正式值写入待实施 |
+| 6 | Evidence、领域、冲突验证和 Canonicalization | 开发闭环完成 | Task 1–4：验证、差异、候选/证据库、明确人工裁决；业务权威矩阵与Gold验收仍待补充 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
 | 9 | Review Agent | 未开始 | 仅在前置质量条件满足后进入 |
 
 ## 已完成工作
+
+### Slice 6 当前检查点：Task 4
+
+review candidates列出候选ID、原检查/证据及当前正式值ID；review decide读取人工裁决JSON。
+批准需审核人、理由、明确权威确认和完整证据候选，重新通过机械检查后才生成正式事实。
+拒绝或unresolved只追加记录；原候选与已有正式值保留。同一decision_id完全重复复用，变更拒绝。
+canonical_heads指向当前版本，canonical_facts保留所有已批准历史；expected_current_fact_id防止旧视图覆盖新提交。
+新增review_requests保存完整输入、修订证据与策略版本manual-reviewed-v1；Alembic 0004添加两张表。
+格式/证据错误保留私有草稿，返回位置和错误code；写入失败整体回滚。
+真实ACR125只执行明确标注为Codex离线试跑的unresolved路径，重复复用，0正式写入、0模型调用。
+批准与改值目前由测试样例验证，没有冒充真实人工审核或Gold。
+这是单机可信操作员MVP，reviewer为输入声明，不是账号认证；多用户权限、完整字段权威矩阵和审核台UI仍待实现。
+下一步Slice 7：检查旧12维评分含义/输入/权重，基于已批准事实设计评分与人工作答评估。
 
 ### Slice 6 当前检查点：Task 3
 
