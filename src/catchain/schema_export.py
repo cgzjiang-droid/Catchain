@@ -14,8 +14,10 @@ from catchain.domain import (
     ProjectExtraction,
     SourceDocument,
 )
+from catchain.domain.validation import ExtractionValidationReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
+    "extraction-validation-report": ExtractionValidationReport,
     "document-version": DocumentVersion,
     "evidence-ref": EvidenceRef,
     "field-observation": FieldObservation,

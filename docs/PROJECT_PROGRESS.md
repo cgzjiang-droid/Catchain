@@ -15,7 +15,7 @@
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
 | 5 | Provider-neutral 与真实 LLM 结构化抽取 | 开发闭环完成 | 真实DeepSeek、缓存/运行记录、同页Regex比较；未认证准确率 |
-| 6 | Evidence、领域、冲突验证和 Canonicalization | 未开始 | 已收集产品规则，待实现 |
+| 6 | Evidence、领域、冲突验证和 Canonicalization | 进行中 | Task 1机械验证/审核分流完成；跨字段与正式事实库待实施 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
 | 9 | Review Agent | 未开始 | 仅在前置质量条件满足后进入 |
@@ -55,7 +55,7 @@
 
 当前分支：`codex/slice-3-parsing-ocr`
 
-当前任务：Slice 5四任务开发闭环完成；下一步Slice 6领域/语义验证与Canonicalization。
+当前任务：Slice 6 Task 1完成；下一步字段化业务/跨字段与跨文档规则。
 
 Slice 4 已完成：
 
@@ -189,3 +189,14 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 重复比较复用报告和run。模型缓存读取也验证候选Schema、输入身份与原文位置。
 - 验证报告：`docs/validation/2026-09-17-slice-5-same-pages.md`。
 - 所有候选仍unvalidated；单样本不认证准确率、生产稳定性或上线资格。
+
+### Slice 6 Task 1：验证报告与审核分流
+
+- 新增ValidationIssue、CandidateValidation、ExtractionValidationReport及第8个Schema。
+- validate extraction核对来源/run/内容，检查已定义字段类型、日期、单位、原文位置和冲突。
+- 低于0.8分流阈值、缺置信度、模糊日期、未知业务合同与语义支持待确认均保持待审核。
+- 原候选与证据完整保留，分别输出missing/rejected/needs_review；没有自动事实写入。
+- 真实ACR125候选验证：2待审核、2缺失、0拒绝；重复复用报告；没有新增API请求。
+- 跨字段/文档/版本规则、Canonical数据库、审核裁决输入仍待后续Task。
+- 94测试、Ruff、wheel构建与8个Schema检查通过；验证报告见
+  `docs/validation/2026-09-17-slice-6-mechanical-validation.md`。

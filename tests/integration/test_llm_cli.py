@@ -125,3 +125,26 @@ def test_llm_cli_import_parse_and_extract_uses_source_identity(tmp_path, monkeyp
     invalid = runner.invoke(app, [*args, "--page", "2"])
     assert invalid.exit_code == 1
     assert len(calls) == 1
+    validation_args = [
+        "validate",
+        "extraction",
+        info["artifact_path"],
+        "--database",
+        str(database),
+        "--output-dir",
+        str(tmp_path / "validation"),
+    ]
+    validated = runner.invoke(app, validation_args)
+    assert validated.exit_code == 0, validated.exception
+    validation_info = json.loads(validated.stdout)
+    assert validation_info["counts"] == {"missing": 0, "rejected": 0, "needs_review": 1}
+    assert validation_info["canonical_writes"] == 0 and len(calls) == 1
+    validation_report = json.loads(Path(validation_info["artifact_path"]).read_text())
+    assert validation_report["result"]["extraction_run_id"] == info["pipeline_run_id"]
+    assert (
+        validation_report["result"]["checks"][0]["observation"]
+        == artifact["result"]["observations"][0]
+    )
+    repeated = runner.invoke(app, validation_args)
+    assert repeated.exit_code == 0, repeated.exception
+    assert json.loads(repeated.stdout)["status"] == "reused"

@@ -15,7 +15,8 @@ Broader company assets and network adapters remain pending. Slice 5 now includes
 response/run logging, grounding checks and the llm-once CLI. One real pilot call
 has succeeded. Completed-input caching and opt-in pricing/budget controls are in place;
 fixed-page Regex/LLM candidate comparison is available. Accuracy against human gold
-labels and domain/semantic validation remain pending.
+labels remain pending. Slice 6 now includes mechanical candidate checks and explicit
+human-review routing; semantic rules and canonical fact storage remain pending.
 See [Project Progress](docs/PROJECT_PROGRESS.md) for the continuous implementation and
 learning status.
 

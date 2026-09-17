@@ -5,7 +5,7 @@
 当前已实现本地PDF导入、SHA-256去重、文档版本、逐页解析、OCR分流、Regex候选
 抽取与12维关键词Baseline。SQLite保存文档与Parsed页面；抽取/评分候选和成功
 run记录保存为不可变JSON。真实LLM、调用缓存、显式费用控制和同页候选比较已接入；
-事实验证、最终评分、审核台与联网抓取待开发。
+机械候选验证与审核分流也已接入；跨字段/语义规则、正式事实库、最终评分、审核台与联网抓取待开发。
 完整进度见 [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md)。
 
 ## 安装与检查
@@ -76,7 +76,7 @@ venv/bin/catchain score keywords PARSED_UUID
 ## 当前已知边界
 
 - 55个观察字段的合同不代表Regex已覆盖55字段；没有规则与未命中分别说明原因。
-- 原文可定位不代表事实语义、单位或日期已经正确，验证和人工审核尚待后续Slice。
+- 原文可定位不代表事实语义、单位或日期已经正确；机械验证已接入，语义/业务规则和人工裁决仍待后续Task。
 - 开发pilot的3个来源为明确占位、Gold样本少1项目、OCR工具未安装；不能宣称MVP已通过。
 - 成功run在结果JSON里，失败run完整持久化和Canonical数据库表还未实现。
 
@@ -143,3 +143,22 @@ LLM_ARTIFACT替换为llm-once的artifact_path，也支持保留完整started记�
 每项保留双方原值、单位、缺失原因、证据和冲突。same_values按值与单位精确比较，
 不是事实裁决；both_missing也不是答对。没有人工Gold时accuracy=null。
 重复比较复用不可变报告和原run，--output-dir可自定义私有报告目录。
+
+## 6. 验证候选并查看待审核原因
+
+```bash
+venv/bin/catchain validate extraction EXTRACTION_ARTIFACT \
+  --database data/catchain.sqlite
+```
+
+EXTRACTION_ARTIFACT替换为Regex或llm-once的artifact_path。程序核对数据库来源、
+成功抽取run与内容哈希，输出私有验证报告；不联网、不请求模型、不写Canonical。
+报告checks保留每条原候选及其索引、原页码/原文/位置、问题code和message。
+
+missing表示明确弃答；rejected表示机械错误，原值仍保留；needs_review表示需要
+裁决，不能当正式事实。完整ISO日期与存在的引用也不会跳过语义审核。
+默认confidence-threshold为0.8，可显式配置；没有置信度不等于高置信度，阈值未做Gold校准。
+未定义的业务类型返回field_contract_pending，不凭字段名猜合同。
+
+报告run的succeeded仅代表验证处理已完成，不代表每个候选通过或允许上线。
+重复执行复用不可变报告与run，--output-dir可以自定义私有位置。
