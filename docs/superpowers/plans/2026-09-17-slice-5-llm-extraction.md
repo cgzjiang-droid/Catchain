@@ -14,7 +14,7 @@
 - [x] Task 3：调用前缓存、run/call记录、tokens/延迟/成本和有界retry。
   - 缓存身份包括文档、选中页、prompt/schema版本和model。
   - 成本须基于明确价格配置；未知费用不得写成0。失败记录也要持久化。
-- [ ] Task 4：CLI接入、数据库来源身份检查、真实小样本调用及与Regex的逐字段对比。
+- [x] Task 4：CLI接入、数据库来源身份检查、真实小样本调用及与Regex的逐字段对比。
   - 没有人工gold不能报告准确率；保存失败/缺失/冲突，保留旧Regex输出。
   - 真实调用成功以前，不能把fake fixture或网络连通标为真实LLM完成。
 
@@ -30,7 +30,7 @@
 这仅证明两个站点网络可达，不代表Registry全部可达、API账号有余额或模型调用成功。
 本地.env已保存DEEPSEEK_API_KEY，Git忽略、权限600；GET /models鉴权成功。
 返回deepseek-flash、deepseek-v4-pro。已完成一次生成抽取及llm-once CLI；Token/延迟与成功/失败run记录已落盘。
-调用前缓存、显式价格与费用上限已实现；固定同输入样本对比尚待实施。
+调用前缓存、显式价格与费用上限和固定同页样本对比已实现。
 
 ## Task 2验收
 
@@ -47,3 +47,13 @@
 价格不是内置常量：只有调用者明确给出输入/输出每百万Token的USD价格时，才记录
 实际估算费用。设置`--max-estimated-cost-usd`必须同时给出两项价格；系统用输入字节
 上界和最大输出Token计算保守上限，并在请求前阻止超额调用。未知价格保持null。
+
+## Task 4验收
+
+`compare extraction LLM_ARTIFACT`从原始started记录读取选页/字段，验证成功run、
+Parsed内容哈希、数据库项目身份和引用后，再让Regex读取同样页面。保留原PDF页码；
+生成候选差异、缺失原因、单位、证据和冲突，不把一致率当准确率。
+
+复用ACR125已保存的真实DeepSeek响应，固定第1页/四字段：2个llm_only、2个both_missing。
+本次没有新增API调用。重复比较复用不可变报告和原run；详见同页比较验证报告。
+Slice 5开发范围完成，不代表模型质量、正式事实库或MVP验收完成。

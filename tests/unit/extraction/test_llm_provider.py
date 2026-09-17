@@ -158,6 +158,18 @@ def test_matching_completed_input_reuses_cache_without_a_second_api_call(tmp_pat
     assert repeat_calls == []
 
 
+def test_corrupted_cached_evidence_is_rejected_without_recalling_model(tmp_path, monkeypatch):
+    document = parsed()
+    artifact, calls = invoke(tmp_path, monkeypatch, api_body(candidate()), document)
+    cached = json.loads(artifact.path.read_text())
+    cached["result"]["observations"][0]["evidence"][0]["quote"] = "invented quote"
+    artifact.path.write_text(json.dumps(cached))
+    before = artifact.path.read_bytes()
+    with pytest.raises(ProviderError, match="conflict"):
+        invoke(tmp_path, monkeypatch, api_body(candidate()), document)
+    assert len(calls) == 1 and artifact.path.read_bytes() == before
+
+
 def test_cost_ceiling_blocks_call_and_configured_rates_are_recorded(tmp_path, monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("must not call provider")

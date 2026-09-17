@@ -4,7 +4,8 @@
 
 当前已实现本地PDF导入、SHA-256去重、文档版本、逐页解析、OCR分流、Regex候选
 抽取与12维关键词Baseline。SQLite保存文档与Parsed页面；抽取/评分候选和成功
-run记录保存为不可变JSON。真实LLM单次抽取已接入；调用缓存/费用控制、事实验证、最终评分、审核台与联网抓取待开发。
+run记录保存为不可变JSON。真实LLM、调用缓存、显式费用控制和同页候选比较已接入；
+事实验证、最终评分、审核台与联网抓取待开发。
 完整进度见 [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md)。
 
 ## 安装与检查
@@ -102,7 +103,7 @@ venv/bin/catchain extract llm-once PARSED_UUID \
 字段、Prompt、Schema、模型、输出上限和费用配置。任一项改变会产生新调用。每次新
 调用最多一次、零自动retry；同键调用正在进行时会停止，避免并发重复计费。API空响应、
 截断、非法JSON或假引用会失败，并保留失败记录；失败结果不缓存。
-输出artifact_path指向私有run目录中的result.json。started.json和response.json保存
+输出artifact_path指向私有cache目录中的不可变结果。runs/<run-id>/started.json和response.json保存
 输入身份/配置哈希、模型原始响应、tokens和延迟；失败保存failed.json。
 结果仍unvalidated，不写Canonical事实，不生成最终业务评分。
 
@@ -126,3 +127,19 @@ venv/bin/catchain extract llm-once PARSED_UUID --page 1 --field project_name \
 ```bash
 venv/bin/python -m pytest tests/unit/extraction tests/integration/test_llm_cli.py -q
 ```
+
+## 5. 在同一输入上比较Regex与LLM
+
+```bash
+venv/bin/catchain compare extraction LLM_ARTIFACT \
+  --database data/catchain.sqlite
+```
+
+LLM_ARTIFACT替换为llm-once的artifact_path，也支持保留完整started记录的旧真实run。
+比较只读取已有结果，不联网、不请求模型。它从原始处理记录读取选页与字段，校验
+文档/来源/run/哈希/证据后，让Regex读取相同页面，保留原PDF页码。
+
+输出报告包括same_values、different_values、llm_only、regex_only和both_missing；
+每项保留双方原值、单位、缺失原因、证据和冲突。same_values按值与单位精确比较，
+不是事实裁决；both_missing也不是答对。没有人工Gold时accuracy=null。
+重复比较复用不可变报告和原run，--output-dir可自定义私有报告目录。

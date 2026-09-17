@@ -107,8 +107,24 @@ RULES = {
 
 
 def extract_regex(
-    parsed: ParsedDocument, project_id: str, registry: Registry, *, pipeline_run_id: UUID
+    parsed: ParsedDocument,
+    project_id: str,
+    registry: Registry,
+    *,
+    pipeline_run_id: UUID,
+    page_numbers: tuple[int, ...] | None = None,
 ) -> ProjectExtraction:
+    pages = parsed.pages
+    if page_numbers is not None:
+        if (
+            not page_numbers
+            or len(set(page_numbers)) != len(page_numbers)
+            or any(
+                type(number) is not int or not 1 <= number <= len(pages) for number in page_numbers
+            )
+        ):
+            raise ValueError("select unique existing page numbers")
+        pages = tuple(pages[number - 1] for number in sorted(page_numbers))
     observations = []
     for field_name in get_args(FieldName):
         candidates = []
@@ -116,7 +132,7 @@ def extract_regex(
         if field_name in RULES:
             patterns, kind, unit = RULES[field_name]
             for pattern in patterns:
-                for page in parsed.pages:
+                for page in pages:
                     for match in re.finditer(pattern, page.text, flags=re.I):
                         raw = match.group(1)
                         normalized = re.sub(r"\s+", " ", raw).strip()
@@ -135,7 +151,7 @@ def extract_regex(
                                 or len(normalized.split()) > 12
                                 or re.search(
                                     r"\b(?:considered|analysis|common practice|"
-                                r"shall|therefore|because)\b",
+                                    r"shall|therefore|because)\b",
                                     normalized,
                                     re.I,
                                 )

@@ -14,7 +14,7 @@
 | 2 | Raw 导入、SHA-256、去重、版本、SQLite | 已完成 | 不可变原文件存储、本地导入服务、数据库、CLI |
 | 3 | Parsed 层、页面质量、OCR fallback | 已完成 | Parsed合同、原生解析、OCR分流、持久化和CLI |
 | 4 | 迁移 Regex 抽取和关键词评分基线 | 基线闭环完成 | 合同、逐页Regex、标签规则、独立关键词评分与CLI；补充旧资产仍有backlog |
-| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 进行中 | Task 3缓存、费用上限和运行记录完成；固定样本对比待实施 |
+| 5 | Provider-neutral 与真实 LLM 结构化抽取 | 开发闭环完成 | 真实DeepSeek、缓存/运行记录、同页Regex比较；未认证准确率 |
 | 6 | Evidence、领域、冲突验证和 Canonicalization | 未开始 | 已收集产品规则，待实现 |
 | 7 | 12 维评估、人工作答对比 | 未开始 | 已确定 Gold Standard 原则 |
 | 8 | 审核台、反馈、产品指标 | 未开始 | 已确定人工介入和审计要求 |
@@ -55,7 +55,7 @@
 
 当前分支：`codex/slice-3-parsing-ocr`
 
-当前任务：Slice 5 Task 3已完成；下一步固定同输入样本的Regex/LLM对比。
+当前任务：Slice 5四任务开发闭环完成；下一步Slice 6领域/语义验证与Canonicalization。
 
 Slice 4 已完成：
 
@@ -68,13 +68,13 @@ Slice 4 已完成：
 - Task 2：基础逐页Regex已输出11 PDF开发候选；原文切片检查通过。
 - 指定最终交付包已核对：28个顶层输出键，含公司/标题/计入期；历史23键结论不能套用。
 - 历史项目JSONL已逐行解码：ACR 3、GOLD 541、VCS 741，共1285条，正确性未认证。
-- 真实LLM、完整事实库、最终评估和审核台尚未实现，不宣称已完成重构。
+- 真实LLM已在Slice 5接入；完整事实库、最终评估和审核台尚未实现，不宣称已完成重构。
 
 下一步按现有计划执行：
 
-1. Slice 5先定义provider-neutral抽取输入/输出、页面选择、失败与有界retry。
-2. 编写详细实施计划，复用共享合同、Parsed、Evidence和run身份。
-3. 实现fake adapter做离线验证，再接一个真实LLM；不能把fake输出称为真实AI。
+1. Slice 6明确字段类型、日期/单位规则、引用与值的支持关系和冲突验证。
+2. 建立待审核与Canonical事实的边界，延续共享合同、Parsed、Evidence和run身份。
+3. 在有人工Gold之前保留accuracy=null；不因引用存在就自动认可字段。
 4. 保留Registry联网adapter、完整公司实体解析与Gold样本缺口，不遗漏也不混入已完成能力。
 
 ## 已讨论产品规则在计划中的位置
@@ -181,3 +181,11 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 验证报告：`docs/validation/2026-09-17-slice-5-first-real-call.md`。
 - Task 3完成：同一成功输入复用缓存；同键进行中阻止重复调用；失败不缓存。价格未明确
   配置时费用仍为null；用户可传入当日输入/输出价格和本次金额上限。
+
+### Slice 5 Task 4验收
+
+- compare extraction完成同页同字段候选比较，保持原PDF页码；核对run/hash/来源/证据。
+- 复用真实ACR125第1页响应：2个LLM独有候选、2个双方缺失。没有新增API费用。
+- 重复比较复用报告和run。模型缓存读取也验证候选Schema、输入身份与原文位置。
+- 验证报告：`docs/validation/2026-09-17-slice-5-same-pages.md`。
+- 所有候选仍unvalidated；单样本不认证准确率、生产稳定性或上线资格。

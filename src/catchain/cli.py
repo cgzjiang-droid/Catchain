@@ -15,6 +15,7 @@ from catchain.domain import (
     ParsedDocument,
     PipelineRun,
     PipelineStage,
+    ProjectExtraction,
     Registry,
     RunStatus,
     SourceDocument,
@@ -40,11 +41,13 @@ ingest_app = typer.Typer(help="Import source documents into the Raw layer.")
 parse_app = typer.Typer(help="Convert Raw PDF versions into Parsed documents.")
 extract_app = typer.Typer(help="Produce evidence-backed candidate artifacts.")
 score_app = typer.Typer(help="Run comparison scoring baselines.")
+compare_app = typer.Typer(help="Compare candidates on identical selected pages.")
 app.add_typer(schema_app, name="schema")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(parse_app, name="parse")
 app.add_typer(extract_app, name="extract")
 app.add_typer(score_app, name="score")
+app.add_typer(compare_app, name="compare")
 
 
 @schema_app.command("export")
@@ -406,6 +409,75 @@ def extract_llm_once(
                 "worst_case_estimated_cost_usd": configuration["worst_case_estimated_cost_usd"],
                 "validation_status": "unvalidated",
                 "cache_enabled": True,
+            }
+        )
+    )
+
+
+@compare_app.command("extraction")
+def compare_extraction_command(
+    llm_artifact: Annotated[Path, typer.Argument()],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted/comparison"),
+) -> None:
+    """Offline Regex/LLM candidate differences; does not call a model."""
+    from catchain.extraction.comparison import compare_extraction
+
+    started_at = datetime.now(UTC)
+    try:
+        bundle = json.loads(llm_artifact.read_text(encoding="utf-8"))
+        llm = ProjectExtraction.model_validate(bundle["result"])
+        start_path = llm_artifact.parent / "started.json"
+        if not start_path.is_file():
+            start_path = (
+                llm_artifact.parent.parent / "runs" / str(llm.pipeline_run_id) / "started.json"
+            )
+        started = json.loads(start_path.read_text(encoding="utf-8"))
+        repository = SqlAlchemyDocumentRepository(create_sqlite_engine(database))
+        parsed = repository.get_parsed(llm.parsed_document_id)
+        if parsed is None:
+            raise ValueError("Parsed document absent")
+        version = repository.get_version(parsed.document_version_id)
+        source = repository.get_source(version.source_document_id) if version else None
+        if source is None or (source.registry_project_id, source.registry) != (
+            llm.project_id,
+            llm.registry,
+        ):
+            raise ValueError("source identity mismatch")
+        report = compare_extraction(parsed, bundle, started)
+        report["source_sha256"] = version.sha256
+        run_id = uuid4()
+        report["pipeline_run_id"] = str(run_id)
+        run = PipelineRun(
+            pipeline_run_id=run_id,
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(parsed.model_dump_json().encode()).hexdigest(),
+            config_hash=hashlib.sha256(
+                json.dumps(
+                    {
+                        "comparison_version": "fixed-pages-v1",
+                        "comparison_id": report["comparison_id"],
+                    },
+                    sort_keys=True,
+                ).encode()
+            ).hexdigest(),
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+        )
+        path, stored, reused = store_baseline_artifact(output_dir, report, run)
+    except (ValueError, OSError, KeyError, TypeError):
+        _fail_parse("COMPARISON_FAILED", "artifact/source/evidence validation or storage failed")
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "counts": stored["result"]["counts"],
+                "accuracy": None,
+                "gold_status": "not_available",
+                "model_calls": 0,
             }
         )
     )

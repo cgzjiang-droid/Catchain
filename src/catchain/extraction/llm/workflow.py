@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import get_args
 
 from catchain.domain import ParsedDocument, PipelineRun, PipelineStage, Registry, RunStatus
-from catchain.domain.extraction import FieldName
+from catchain.domain.extraction import FieldName, ProjectExtraction
 from catchain.extraction.llm.contract import (
     ModelResponse,
     StructuredProvider,
@@ -34,7 +34,12 @@ class CostRates:
     output_per_million_usd: Decimal
 
     def __post_init__(self) -> None:
-        if self.input_per_million_usd < 0 or self.output_per_million_usd < 0:
+        if (
+            not self.input_per_million_usd.is_finite()
+            or not self.output_per_million_usd.is_finite()
+            or self.input_per_million_usd < 0
+            or self.output_per_million_usd < 0
+        ):
             raise ValueError("token prices must be non-negative")
 
 
@@ -60,14 +65,42 @@ def _estimated_cost(input_tokens: int, output_tokens: int, rates: CostRates | No
     )
 
 
-def _read_cached(path: Path, configuration: dict) -> bool:
+def _read_cached(
+    path: Path,
+    configuration: dict,
+    parsed: ParsedDocument,
+    project_id: str,
+    registry: Registry,
+) -> bool:
     try:
         cached = json.loads(path.read_text(encoding="utf-8"))
         run = PipelineRun.model_validate(cached["run"])
+        extraction = ProjectExtraction.model_validate(cached["result"])
+        for observation in extraction.observations:
+            for evidence in observation.evidence:
+                if evidence.page_number not in configuration["selected_page_numbers"]:
+                    return False
+                text = parsed.pages[evidence.page_number - 1].text
+                if (
+                    evidence.char_start is None
+                    or evidence.char_end is None
+                    or evidence.char_end > len(text)
+                    or text[evidence.char_start : evidence.char_end] != evidence.quote
+                ):
+                    return False
         return (
             run.status is RunStatus.SUCCEEDED
+            and run.stage is PipelineStage.LLM_EXTRACTED
+            and run.input_hash == digest(parsed.model_dump_json())
+            and run.config_hash == digest(json.dumps(configuration, sort_keys=True))
             and cached["configuration"] == configuration
-            and cached["result"]["pipeline_run_id"] == str(run.pipeline_run_id)
+            and extraction.pipeline_run_id == run.pipeline_run_id
+            and extraction.parsed_document_id == parsed.parsed_document_id
+            and extraction.document_version_id == parsed.document_version_id
+            and extraction.project_id == project_id
+            and extraction.registry == registry
+            and {item.field_name for item in extraction.observations}
+            == set(configuration["requested_fields"])
         )
     except (OSError, ValueError, KeyError, TypeError):
         return False
@@ -121,7 +154,9 @@ def extract_one_call(
     )
     if len(input_json.encode()) + len(prompt.encode()) > 60000:
         raise ValueError("prompt/input byte budget exceeded")
-    if max_estimated_cost_usd is not None and max_estimated_cost_usd < 0:
+    if max_estimated_cost_usd is not None and (
+        not max_estimated_cost_usd.is_finite() or max_estimated_cost_usd < 0
+    ):
         raise ValueError("maximum estimated cost must be non-negative")
     input_token_upper_bound = len((prompt + input_json).encode())
     worst_case_cost = _estimated_cost(input_token_upper_bound, max_output_tokens, cost_rates)
@@ -143,6 +178,7 @@ def extract_one_call(
             )
         ),
         "requested_fields": list(requested_fields),
+        "selected_page_numbers": [page.page_number for page in pages],
         "max_output_tokens": max_output_tokens,
         "input_token_upper_bound": input_token_upper_bound,
         "max_calls": 1,
@@ -161,6 +197,8 @@ def extract_one_call(
             {
                 "document_version_id": str(parsed.document_version_id),
                 "parsed_document_hash": digest(parsed.model_dump_json()),
+                "project_id": project_id,
+                "registry": registry.value,
                 "configuration": configuration,
             },
             sort_keys=True,
@@ -178,7 +216,7 @@ def extract_one_call(
     cache_dir.mkdir(exist_ok=True)
     cache_path = cache_dir / f"{cache_key}.json"
     if cache_path.exists():
-        if _read_cached(cache_path, configuration):
+        if _read_cached(cache_path, configuration, parsed, project_id, registry):
             return ExtractionArtifact(path=cache_path, reused=True)
         raise ProviderError(f"cached artifact conflict: {cache_path}")
     lock_dir = output_dir / ".locks"
@@ -212,7 +250,7 @@ def extract_one_call(
     started = time.monotonic()
     try:
         if cache_path.exists():
-            if _read_cached(cache_path, configuration):
+            if _read_cached(cache_path, configuration, parsed, project_id, registry):
                 return ExtractionArtifact(path=cache_path, reused=True)
             raise ProviderError(f"cached artifact conflict: {cache_path}")
         reply = provider.extract(

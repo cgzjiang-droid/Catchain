@@ -104,6 +104,24 @@ def test_llm_cli_import_parse_and_extract_uses_source_identity(tmp_path, monkeyp
     assert cached.exit_code == 0, cached.exception
     assert json.loads(cached.stdout)["status"] == "reused"
     assert len(calls) == 1
+    compare_args = [
+        "compare",
+        "extraction",
+        info["artifact_path"],
+        "--database",
+        str(database),
+        "--output-dir",
+        str(tmp_path / "comparison"),
+    ]
+    first_comparison = runner.invoke(app, compare_args)
+    assert first_comparison.exit_code == 0, first_comparison.exception
+    comparison_info = json.loads(first_comparison.stdout)
+    assert comparison_info["counts"]["same_values"] == 1
+    assert comparison_info["model_calls"] == 0 and comparison_info["accuracy"] is None
+    repeated_comparison = runner.invoke(app, compare_args)
+    assert repeated_comparison.exit_code == 0, repeated_comparison.exception
+    assert json.loads(repeated_comparison.stdout)["status"] == "reused"
+    assert len(calls) == 1
     invalid = runner.invoke(app, [*args, "--page", "2"])
     assert invalid.exit_code == 1
     assert len(calls) == 1
