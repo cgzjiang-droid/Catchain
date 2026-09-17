@@ -1,0 +1,62 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "byte_size": {
+      "exclusiveMinimum": 0,
+      "title": "Byte Size",
+      "type": "integer"
+    },
+    "content_type": {
+      "minLength": 1,
+      "title": "Content Type",
+      "type": "string"
+    },
+    "declared_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Declared Version"
+    },
+    "document_version_id": {
+      "format": "uuid",
+      "title": "Document Version Id",
+      "type": "string"
+    },
+    "file_name": {
+      "minLength": 1,
+      "title": "File Name",
+      "type": "string"
+    },
+    "retrieved_at": {
+      "format": "date-time",
+      "title": "Retrieved At",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "source_document_id": {
+      "format": "uuid",
+      "title": "Source Document Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_document_id",
+    "sha256",
+    "retrieved_at",
+    "content_type",
+    "file_name",
+    "byte_size"
+  ],
+  "title": "DocumentVersion",
+  "type": "object"
+}

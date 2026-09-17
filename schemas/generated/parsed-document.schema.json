@@ -1,0 +1,162 @@
+{
+  "$defs": {
+    "ParsedPage": {
+      "additionalProperties": false,
+      "description": "Final text and traceability metadata for one PDF page.",
+      "properties": {
+        "char_end": {
+          "minimum": 0,
+          "title": "Char End",
+          "type": "integer"
+        },
+        "char_start": {
+          "minimum": 0,
+          "title": "Char Start",
+          "type": "integer"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "quality": {
+          "$ref": "#/$defs/TextQuality"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "used_ocr": {
+          "default": false,
+          "title": "Used Ocr",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "page_number",
+        "text",
+        "char_start",
+        "char_end",
+        "quality"
+      ],
+      "title": "ParsedPage",
+      "type": "object"
+    },
+    "TextQuality": {
+      "additionalProperties": false,
+      "description": "Deterministic measurements used to decide whether text needs OCR.",
+      "properties": {
+        "alphanumeric_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Alphanumeric Ratio",
+          "type": "number"
+        },
+        "character_count": {
+          "minimum": 0,
+          "title": "Character Count",
+          "type": "integer"
+        },
+        "non_whitespace_count": {
+          "minimum": 0,
+          "title": "Non Whitespace Count",
+          "type": "integer"
+        },
+        "replacement_character_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Replacement Character Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "character_count",
+        "non_whitespace_count",
+        "alphanumeric_ratio",
+        "replacement_character_ratio"
+      ],
+      "title": "TextQuality",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Reproducible page text derived from one immutable document version.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "document_version_id": {
+      "format": "uuid",
+      "title": "Document Version Id",
+      "type": "string"
+    },
+    "ocr_engine_name": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ocr Engine Name"
+    },
+    "ocr_engine_version": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ocr Engine Version"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/ParsedPage"
+      },
+      "minItems": 1,
+      "title": "Pages",
+      "type": "array"
+    },
+    "parsed_document_id": {
+      "format": "uuid",
+      "title": "Parsed Document Id",
+      "type": "string"
+    },
+    "parser_name": {
+      "minLength": 1,
+      "title": "Parser Name",
+      "type": "string"
+    },
+    "parser_version": {
+      "minLength": 1,
+      "title": "Parser Version",
+      "type": "string"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "document_version_id",
+    "parser_name",
+    "parser_version",
+    "pages",
+    "created_at"
+  ],
+  "title": "ParsedDocument",
+  "type": "object"
+}

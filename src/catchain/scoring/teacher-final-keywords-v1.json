@@ -1,0 +1,174 @@
+{
+  "baseline_version": "teacher-final-keywords-v1",
+  "source_sha256": "f65f4e26fb069992717108bf9df6d5211c7c4ecb55f030467460113b11d2c98b",
+  "dimensions": [
+    {
+      "id": "D01",
+      "name": "Grid-connected applicability",
+      "keywords_high": [
+        "grid[- ]connected",
+        "project boundary",
+        "applicability",
+        "eligible"
+      ],
+      "keywords_mid": [
+        "boundary",
+        "scope",
+        "grid"
+      ]
+    },
+    {
+      "id": "D02",
+      "name": "Technology eligibility under ACM0002",
+      "keywords_high": [
+        "wind",
+        "hydro",
+        "solar",
+        "geothermal",
+        "technology"
+      ],
+      "keywords_mid": [
+        "renewable",
+        "plant",
+        "capacity"
+      ]
+    },
+    {
+      "id": "D03",
+      "name": "Baseline construction integrity",
+      "keywords_high": [
+        "baseline scenario",
+        "baseline emissions",
+        "assumptions"
+      ],
+      "keywords_mid": [
+        "baseline"
+      ]
+    },
+    {
+      "id": "D04",
+      "name": "Grid emission factor chain",
+      "keywords_high": [
+        "emission factor",
+        "efgrid",
+        "cdm tool",
+        "tco2"
+      ],
+      "keywords_mid": [
+        "grid emission",
+        "factor"
+      ]
+    },
+    {
+      "id": "D05",
+      "name": "Generation/export metering quality",
+      "keywords_high": [
+        "meter",
+        "calibration",
+        "electricity generated",
+        "mwh"
+      ],
+      "keywords_mid": [
+        "generation",
+        "monitoring data"
+      ]
+    },
+    {
+      "id": "D06",
+      "name": "Project emissions (PE) treatment",
+      "keywords_high": [
+        "project emissions",
+        "\\bpe\\b",
+        "pey"
+      ],
+      "keywords_mid": [
+        "emissions"
+      ]
+    },
+    {
+      "id": "D07",
+      "name": "Leakage (LE) treatment",
+      "keywords_high": [
+        "leakage",
+        "\\ble\\b",
+        "ley"
+      ],
+      "keywords_mid": [
+        "leak"
+      ]
+    },
+    {
+      "id": "D08",
+      "name": "ER formula reproducibility",
+      "keywords_high": [
+        "er\\s*=\\s*be\\s*[-\u2212]\\s*pe\\s*[-\u2212]\\s*le",
+        "emission reductions",
+        "ery"
+      ],
+      "keywords_mid": [
+        "\\ber\\b",
+        "\\bbe\\b",
+        "\\bpe\\b",
+        "\\ble\\b"
+      ]
+    },
+    {
+      "id": "D09",
+      "name": "Additionality robustness",
+      "keywords_high": [
+        "additionality",
+        "barrier analysis",
+        "investment analysis",
+        "common practice"
+      ],
+      "keywords_mid": [
+        "additional"
+      ]
+    },
+    {
+      "id": "D10",
+      "name": "Monitoring architecture completeness",
+      "keywords_high": [
+        "monitoring plan",
+        "qa/?qc",
+        "data gap",
+        "archiving"
+      ],
+      "keywords_mid": [
+        "monitoring",
+        "parameter"
+      ]
+    },
+    {
+      "id": "D11",
+      "name": "Verification reproducibility and cycle consistency",
+      "keywords_high": [
+        "validation report",
+        "verification report",
+        "vvb",
+        "validator",
+        "verifier"
+      ],
+      "keywords_mid": [
+        "verification",
+        "validation"
+      ]
+    },
+    {
+      "id": "D12",
+      "name": "Registry/version transition readiness",
+      "keywords_high": [
+        "registration",
+        "issuance",
+        "version",
+        "methodology version",
+        "registry"
+      ],
+      "keywords_mid": [
+        "registered",
+        "listed",
+        "crediting period"
+      ]
+    }
+  ]
+}

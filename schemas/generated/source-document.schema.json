@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "DocumentType": {
+      "enum": [
+        "project_description",
+        "monitoring_report",
+        "validation_report",
+        "verification_report",
+        "registry_export",
+        "other"
+      ],
+      "title": "DocumentType",
+      "type": "string"
+    },
+    "Registry": {
+      "enum": [
+        "acr",
+        "gold_standard",
+        "verra"
+      ],
+      "title": "Registry",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "discovered_at": {
+      "format": "date-time",
+      "title": "Discovered At",
+      "type": "string"
+    },
+    "document_type": {
+      "$ref": "#/$defs/DocumentType"
+    },
+    "registry": {
+      "$ref": "#/$defs/Registry"
+    },
+    "registry_project_id": {
+      "minLength": 1,
+      "title": "Registry Project Id",
+      "type": "string"
+    },
+    "source_document_id": {
+      "format": "uuid",
+      "title": "Source Document Id",
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    }
+  },
+  "required": [
+    "registry",
+    "registry_project_id",
+    "source_url",
+    "document_type",
+    "discovered_at"
+  ],
+  "title": "SourceDocument",
+  "type": "object"
+}

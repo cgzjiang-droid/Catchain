@@ -1,0 +1,227 @@
+{
+  "$defs": {
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "char_end": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char End"
+        },
+        "char_start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char Start"
+        },
+        "document_version_id": {
+          "format": "uuid",
+          "title": "Document Version Id",
+          "type": "string"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_version_id",
+        "page_number",
+        "quote"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "An unvalidated candidate or explicit abstention; never a canonical fact.",
+  "properties": {
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "field_name": {
+      "enum": [
+        "project_id",
+        "project_name",
+        "country",
+        "grid_connection_status",
+        "project_boundary_text",
+        "technology_type",
+        "installed_capacity_mw",
+        "renewable_resource_type",
+        "baseline_scenario_text",
+        "baseline_formula_present",
+        "baseline_assumptions_table",
+        "ef_value",
+        "ef_unit",
+        "ef_source_reference",
+        "ef_vintage_year",
+        "electricity_generated_mwh",
+        "electricity_exported_mwh",
+        "meter_calibration_status",
+        "data_frequency",
+        "pe_applicable_flag",
+        "pe_value_tco2e",
+        "pe_method_text",
+        "le_applicable_flag",
+        "le_value_tco2e",
+        "le_justification_text",
+        "be_value_tco2e",
+        "er_reported_tco2e",
+        "er_recalculated_tco2e",
+        "er_recalc_error_pct",
+        "additionality_tool_used",
+        "investment_analysis_result",
+        "barrier_analysis_result",
+        "common_practice_result",
+        "monitoring_parameters_listed",
+        "qa_qc_procedure_text",
+        "data_gap_procedure_text",
+        "archiving_period_years",
+        "validator_name",
+        "verifier_name",
+        "verification_period_start",
+        "verification_period_end",
+        "verification_cycle_count",
+        "methodology_name",
+        "methodology_version",
+        "registered_date",
+        "listed_date",
+        "issuance_cycle_count",
+        "version_change_note",
+        "project_participant",
+        "project_owner",
+        "project_developer",
+        "project_operator",
+        "crediting_period_years",
+        "crediting_period_start",
+        "crediting_period_end"
+      ],
+      "title": "Field Name",
+      "type": "string"
+    },
+    "issues": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "missing_reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "not_found",
+            "unsupported_by_baseline",
+            "ambiguous"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Missing Reason"
+    },
+    "normalized_value": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized Value"
+    },
+    "raw_value": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Value"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "validation_status": {
+      "const": "unvalidated",
+      "default": "unvalidated",
+      "title": "Validation Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "field_name"
+  ],
+  "title": "FieldObservation",
+  "type": "object"
+}

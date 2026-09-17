@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "PipelineStage": {
+      "enum": [
+        "discovered",
+        "downloaded",
+        "hashed",
+        "parsed",
+        "ocr_required",
+        "ocr_parsed",
+        "baseline_extracted",
+        "llm_extracted",
+        "schema_validated",
+        "quality_validated",
+        "canonicalized",
+        "scored",
+        "evaluated"
+      ],
+      "title": "PipelineStage",
+      "type": "string"
+    },
+    "RunStatus": {
+      "enum": [
+        "running",
+        "succeeded",
+        "failed",
+        "skipped"
+      ],
+      "title": "RunStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "config_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "error_message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Message"
+    },
+    "finished_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finished At"
+    },
+    "input_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "pipeline_run_id": {
+      "format": "uuid",
+      "title": "Pipeline Run Id",
+      "type": "string"
+    },
+    "stage": {
+      "$ref": "#/$defs/PipelineStage"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/RunStatus"
+    }
+  },
+  "required": [
+    "stage",
+    "status",
+    "input_hash",
+    "config_hash",
+    "started_at"
+  ],
+  "title": "PipelineRun",
+  "type": "object"
+}
