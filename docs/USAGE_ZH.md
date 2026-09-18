@@ -5,7 +5,7 @@
 当前已实现本地PDF导入、SHA-256去重、文档版本、逐页解析、OCR分流、Regex候选
 抽取与12维关键词Baseline。SQLite保存文档与Parsed页面；抽取/评分候选和成功
 run记录保存为不可变JSON。真实LLM、调用缓存、显式费用控制和同页候选比较已接入；
-机械候选验证与审核分流也已接入；跨字段/语义规则、正式事实库、最终评分、审核台与联网抓取待开发。
+机械候选验证、审核分流和Slice 7评估闭环已接入；正式策略仍需人工批准，Slice 8继续实现审核队列和纠错界面。
 完整进度见 [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md)。
 
 ## 安装与检查
@@ -80,7 +80,7 @@ venv/bin/catchain score keywords PARSED_UUID
 - 开发pilot的3个来源为明确占位、Gold样本少1项目、OCR工具未安装；不能宣称MVP已通过。
 - 成功run在结果JSON里，失败run完整持久化和Canonical数据库表还未实现。
 
-后续按进度表进入真实LLM抽取→验证→事实存储→评估→审核台，保持普通Workflow。
+后续按进度表进入审核队列→人工纠错→指标统计，保持普通Workflow；没有approved评分策略时不会生成正式总分。
 
 ## 4. DeepSeek单次开发抽取
 
