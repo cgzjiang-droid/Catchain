@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from catchain.domain import EvidenceRef, GoldFieldLabel, GoldSample, Registry
+from catchain.domain import EvidenceRef, GoldDataset, GoldFieldLabel, GoldSample, Registry
 
 
 def test_confirmed_gold_requires_value_and_locatable_evidence():
@@ -60,3 +60,41 @@ def test_gold_freeze_requires_adjudication_and_resolves_conflicts():
         **{**base, "labels": (conflict,)}, status="adjudication_required"
     )
     assert draft.status == "adjudication_required"
+
+
+def test_gold_dataset_rejects_split_leakage_and_freezes_only_frozen_samples():
+    def sample(sample_id, project_id, split, status="draft"):
+        return GoldSample(
+            dataset_version="gold-v1",
+            sample_id=sample_id,
+            split=split,
+            registry=Registry.ACR,
+            project_id=project_id,
+            document_version_id=uuid4(),
+            parsed_document_id=uuid4(),
+            labels=(
+                GoldFieldLabel(
+                    field_name="project_name",
+                    status="unknown",
+                    reason="No reliable label yet",
+                ),
+            ),
+            reviewers=("reviewer",),
+            status=status,
+        )
+
+    with pytest.raises(ValidationError, match="multiple dataset splits"):
+        GoldDataset(
+            dataset_version="gold-v1",
+            samples=(
+                sample("one", "P1", "development"),
+                sample("two", "P1", "test"),
+            ),
+        )
+    with pytest.raises(ValidationError, match="frozen samples"):
+        GoldDataset(
+            dataset_version="gold-v1",
+            samples=(sample("one", "P1", "development"),),
+            status="frozen",
+            frozen_at=datetime.now(UTC),
+        )

@@ -1,0 +1,357 @@
+{
+  "$defs": {
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "char_end": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char End"
+        },
+        "char_start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char Start"
+        },
+        "document_version_id": {
+          "format": "uuid",
+          "title": "Document Version Id",
+          "type": "string"
+        },
+        "page_number": {
+          "minimum": 1,
+          "title": "Page Number",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_version_id",
+        "page_number",
+        "quote"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "GoldFieldLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "field_name": {
+          "enum": [
+            "project_id",
+            "project_name",
+            "country",
+            "grid_connection_status",
+            "project_boundary_text",
+            "technology_type",
+            "installed_capacity_mw",
+            "renewable_resource_type",
+            "baseline_scenario_text",
+            "baseline_formula_present",
+            "baseline_assumptions_table",
+            "ef_value",
+            "ef_unit",
+            "ef_source_reference",
+            "ef_vintage_year",
+            "electricity_generated_mwh",
+            "electricity_exported_mwh",
+            "meter_calibration_status",
+            "data_frequency",
+            "pe_applicable_flag",
+            "pe_value_tco2e",
+            "pe_method_text",
+            "le_applicable_flag",
+            "le_value_tco2e",
+            "le_justification_text",
+            "be_value_tco2e",
+            "er_reported_tco2e",
+            "er_recalculated_tco2e",
+            "er_recalc_error_pct",
+            "additionality_tool_used",
+            "investment_analysis_result",
+            "barrier_analysis_result",
+            "common_practice_result",
+            "monitoring_parameters_listed",
+            "qa_qc_procedure_text",
+            "data_gap_procedure_text",
+            "archiving_period_years",
+            "validator_name",
+            "verifier_name",
+            "verification_period_start",
+            "verification_period_end",
+            "verification_cycle_count",
+            "methodology_name",
+            "methodology_version",
+            "registered_date",
+            "listed_date",
+            "issuance_cycle_count",
+            "version_change_note",
+            "project_participant",
+            "project_owner",
+            "project_developer",
+            "project_operator",
+            "crediting_period_years",
+            "crediting_period_start",
+            "crediting_period_end"
+          ],
+          "title": "Field Name",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "unknown",
+            "conflicting"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field_name",
+        "status",
+        "reason"
+      ],
+      "title": "GoldFieldLabel",
+      "type": "object"
+    },
+    "GoldSample": {
+      "additionalProperties": false,
+      "properties": {
+        "adjudicator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adjudicator"
+        },
+        "dataset_version": {
+          "minLength": 1,
+          "title": "Dataset Version",
+          "type": "string"
+        },
+        "document_version_id": {
+          "format": "uuid",
+          "title": "Document Version Id",
+          "type": "string"
+        },
+        "frozen_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frozen At"
+        },
+        "labels": {
+          "items": {
+            "$ref": "#/$defs/GoldFieldLabel"
+          },
+          "minItems": 1,
+          "title": "Labels",
+          "type": "array"
+        },
+        "parsed_document_id": {
+          "format": "uuid",
+          "title": "Parsed Document Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "registry": {
+          "$ref": "#/$defs/Registry"
+        },
+        "reviewers": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reviewers",
+          "type": "array"
+        },
+        "sample_id": {
+          "minLength": 1,
+          "title": "Sample Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "development",
+            "validation",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "adjudication_required",
+            "frozen"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_version",
+        "sample_id",
+        "split",
+        "registry",
+        "project_id",
+        "document_version_id",
+        "parsed_document_id",
+        "labels",
+        "reviewers"
+      ],
+      "title": "GoldSample",
+      "type": "object"
+    },
+    "Registry": {
+      "enum": [
+        "acr",
+        "gold_standard",
+        "verra"
+      ],
+      "title": "Registry",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A split manifest that prevents the same project leaking across evaluation sets.",
+  "properties": {
+    "dataset_version": {
+      "minLength": 1,
+      "title": "Dataset Version",
+      "type": "string"
+    },
+    "frozen_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Frozen At"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/GoldSample"
+      },
+      "minItems": 1,
+      "title": "Samples",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "frozen"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset_version",
+    "samples"
+  ],
+  "title": "GoldDataset",
+  "type": "object"
+}

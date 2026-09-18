@@ -17,7 +17,7 @@ from catchain.domain import (
 from catchain.domain.assessment import AssessmentContext
 from catchain.domain.consistency import ProjectConsistencyReport
 from catchain.domain.evaluation import EvaluationResult
-from catchain.domain.gold import GoldSample
+from catchain.domain.gold import GoldDataset, GoldSample
 from catchain.domain.judgment import JudgmentRequest
 from catchain.domain.review import ReviewRequest
 from catchain.domain.validation import ExtractionValidationReport
@@ -25,6 +25,7 @@ from catchain.domain.validation import ExtractionValidationReport
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "evaluation-result": EvaluationResult,
     "gold-sample": GoldSample,
+    "gold-dataset": GoldDataset,
     "judgment-request": JudgmentRequest,
     "assessment-context": AssessmentContext,
     "review-request": ReviewRequest,

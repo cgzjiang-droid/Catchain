@@ -62,3 +62,31 @@ class GoldSample(ImmutableDomainModel):
             if conflicts:
                 raise ValueError("frozen gold cannot retain conflicting labels")
         return self
+
+
+class GoldDataset(ImmutableDomainModel):
+    """A split manifest that prevents the same project leaking across evaluation sets."""
+
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    dataset_version: StrictStr = Field(min_length=1)
+    samples: tuple[GoldSample, ...] = Field(min_length=1)
+    status: Literal["draft", "frozen"] = "draft"
+    frozen_at: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def validate_manifest(self) -> Self:
+        if len({sample.sample_id for sample in self.samples}) != len(self.samples):
+            raise ValueError("GoldDataset cannot contain duplicate sample ids")
+        if any(sample.dataset_version != self.dataset_version for sample in self.samples):
+            raise ValueError("GoldSample dataset version differs from manifest")
+        project_splits: dict[str, str] = {}
+        for sample in self.samples:
+            previous = project_splits.setdefault(sample.project_id, sample.split)
+            if previous != sample.split:
+                raise ValueError("a project cannot appear in multiple dataset splits")
+        if self.status == "frozen":
+            if self.frozen_at is None:
+                raise ValueError("frozen GoldDataset requires a timestamp")
+            if any(sample.status != "frozen" for sample in self.samples):
+                raise ValueError("frozen GoldDataset requires frozen samples")
+        return self
