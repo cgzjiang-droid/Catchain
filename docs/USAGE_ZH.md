@@ -252,6 +252,7 @@ methodology_scope只有已批准methodology_name严格为ACM0002时标明范围�
 
 2026-09-18新增产品规则草案：docs/product/2026-09-18-scoring-rubric-review.md。
 对应scoring/acm0002-quality-rubric-draft-v1.json仅供审查，现有命令不会据此自动评分。
+后续v2见docs/product/2026-09-18-scoring-criteria.md，新增36个判定项ID与审核输出要求，仍未启用。
 
 ```bash
 venv/bin/catchain score checks READINESS_ARTIFACT --database data/catchain.sqlite

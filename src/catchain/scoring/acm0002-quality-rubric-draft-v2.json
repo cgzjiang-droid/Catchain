@@ -1,0 +1,1278 @@
+{
+  "policy_version": "acm0002-quality-rubric-draft-v2",
+  "status": "draft_not_executable",
+  "checked_on": "2026-09-18",
+  "origin": "CATchain_internal_quality_proposal_not_official_certification",
+  "source_hashes": {
+    "main.py": "7673f05eb0f62a033d20611df5763f47ca68dc9c9170dce5090c378c9bed83d9",
+    "field_mapping_acm0002_master.json": "d95eeab4a7fc5b25d2dad3c754bc2f0b52c4017716b2d643699b3d5880d28edb",
+    "method_table_acm0002_independent.json": "a3cdda07aae2e1abbb9a0911645d5befb0df90bc4592e0be8a870795a8adb4fa"
+  },
+  "official_sources": [
+    {
+      "url": "https://cdm.unfccc.int/methodologies/DB/XB1TX7TAZ6SLWM9B7BC67THHVD16JV",
+      "scope": "CDM ACM0002 v22 listing; not proof of applicability to a specific registry project"
+    },
+    {
+      "url": "https://verra.org/methodologies/acm0002-grid-connected-electricity-generation-from-renewable-sourcesacm0002/",
+      "scope": "VCS transition/request conditions; project-specific applicability must be reviewed"
+    }
+  ],
+  "activation_requirements": [
+    "registry_and_program_rules_review",
+    "methodology_and_tool_versions_review",
+    "request_type_and_dates_review",
+    "dimension_rubric_and_evidence_review",
+    "tolerance_and_weights_approval",
+    "human_gold_pilot"
+  ],
+  "missing_policy": "unknown_not_zero",
+  "conflict_policy": "unresolved_until_adjudicated",
+  "weight_policy": "unconfirmed_no_total",
+  "dimensions": [
+    {
+      "dimension_id": "D01",
+      "name": "Grid-connected applicability",
+      "input_fields": [
+        "project_id",
+        "project_name",
+        "grid_connection_status",
+        "project_boundary_text"
+      ],
+      "evidence_requirements": [
+        "项目边界章节",
+        "并网或调度证明",
+        "适用版本的条件逐项审核"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D01.C1",
+          "requirement": "项目边界章节",
+          "question": "是否有直接原文支持“项目边界章节”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D01.C2",
+          "requirement": "并网或调度证明",
+          "question": "是否有直接原文支持“并网或调度证明”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D01.C3",
+          "requirement": "适用版本的条件逐项审核",
+          "question": "是否有直接原文支持“适用版本的条件逐项审核”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D02",
+      "name": "Technology eligibility under ACM0002",
+      "input_fields": [
+        "technology_type",
+        "installed_capacity_mw",
+        "renewable_resource_type"
+      ],
+      "evidence_requirements": [
+        "项目技术说明",
+        "装机容量依据",
+        "适用技术与项目活动类型的审核"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D02.C1",
+          "requirement": "项目技术说明",
+          "question": "是否有直接原文支持“项目技术说明”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D02.C2",
+          "requirement": "装机容量依据",
+          "question": "是否有直接原文支持“装机容量依据”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D02.C3",
+          "requirement": "适用技术与项目活动类型的审核",
+          "question": "是否有直接原文支持“适用技术与项目活动类型的审核”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D03",
+      "name": "Baseline construction integrity",
+      "input_fields": [
+        "baseline_scenario_text",
+        "baseline_formula_present",
+        "baseline_assumptions_table"
+      ],
+      "evidence_requirements": [
+        "基准线场景",
+        "计算公式及假设",
+        "审定结论或复核理由"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D03.C1",
+          "requirement": "基准线场景",
+          "question": "是否有直接原文支持“基准线场景”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D03.C2",
+          "requirement": "计算公式及假设",
+          "question": "是否有直接原文支持“计算公式及假设”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D03.C3",
+          "requirement": "审定结论或复核理由",
+          "question": "是否有直接原文支持“审定结论或复核理由”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D04",
+      "name": "Grid emission factor chain",
+      "input_fields": [
+        "ef_value",
+        "ef_unit",
+        "ef_source_reference",
+        "ef_vintage_year"
+      ],
+      "evidence_requirements": [
+        "排放因子数值/单位/年份",
+        "工具版本与来源",
+        "可复算参数或附件"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D04.C1",
+          "requirement": "排放因子数值/单位/年份",
+          "question": "是否有直接原文支持“排放因子数值/单位/年份”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D04.C2",
+          "requirement": "工具版本与来源",
+          "question": "是否有直接原文支持“工具版本与来源”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D04.C3",
+          "requirement": "可复算参数或附件",
+          "question": "是否有直接原文支持“可复算参数或附件”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D05",
+      "name": "Generation/export metering quality",
+      "input_fields": [
+        "electricity_generated_mwh",
+        "electricity_exported_mwh",
+        "meter_calibration_status",
+        "data_frequency"
+      ],
+      "evidence_requirements": [
+        "同周期计量记录",
+        "仪表校准证书及有效期",
+        "监测参数与缺数处理"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D05.C1",
+          "requirement": "同周期计量记录",
+          "question": "是否有直接原文支持“同周期计量记录”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D05.C2",
+          "requirement": "仪表校准证书及有效期",
+          "question": "是否有直接原文支持“仪表校准证书及有效期”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D05.C3",
+          "requirement": "监测参数与缺数处理",
+          "question": "是否有直接原文支持“监测参数与缺数处理”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D06",
+      "name": "Project emissions (PE) treatment",
+      "input_fields": [
+        "pe_applicable_flag",
+        "pe_value_tco2e",
+        "pe_method_text"
+      ],
+      "evidence_requirements": [
+        "项目排放适用条件",
+        "同周期数值或明确不适用理由",
+        "计算与核证依据"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D06.C1",
+          "requirement": "项目排放适用条件",
+          "question": "是否有直接原文支持“项目排放适用条件”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D06.C2",
+          "requirement": "同周期数值或明确不适用理由",
+          "question": "是否有直接原文支持“同周期数值或明确不适用理由”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D06.C3",
+          "requirement": "计算与核证依据",
+          "question": "是否有直接原文支持“计算与核证依据”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D07",
+      "name": "Leakage (LE) treatment",
+      "input_fields": [
+        "le_applicable_flag",
+        "le_value_tco2e",
+        "le_justification_text"
+      ],
+      "evidence_requirements": [
+        "泄漏适用条件",
+        "同周期量化或明确不适用理由",
+        "核证处理依据"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D07.C1",
+          "requirement": "泄漏适用条件",
+          "question": "是否有直接原文支持“泄漏适用条件”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D07.C2",
+          "requirement": "同周期量化或明确不适用理由",
+          "question": "是否有直接原文支持“同周期量化或明确不适用理由”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D07.C3",
+          "requirement": "核证处理依据",
+          "question": "是否有直接原文支持“核证处理依据”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D08",
+      "name": "ER formula reproducibility",
+      "input_fields": [
+        "be_value_tco2e",
+        "er_reported_tco2e",
+        "er_recalculated_tco2e",
+        "er_recalc_error_pct"
+      ],
+      "evidence_requirements": [
+        "同周期BE/PE/LE/ER",
+        "适用公式与输入来源",
+        "复算结果及已批准容差"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "复算不一致时先查周期/单位/输入；容差未批准则不自动判分",
+      "criteria": [
+        {
+          "criterion_id": "D08.C1",
+          "requirement": "同周期BE/PE/LE/ER",
+          "question": "是否有直接原文支持“同周期BE/PE/LE/ER”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D08.C2",
+          "requirement": "适用公式与输入来源",
+          "question": "是否有直接原文支持“适用公式与输入来源”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D08.C3",
+          "requirement": "复算结果及已批准容差",
+          "question": "是否有直接原文支持“复算结果及已批准容差”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D09",
+      "name": "Additionality robustness",
+      "input_fields": [
+        "additionality_tool_used",
+        "investment_analysis_result",
+        "barrier_analysis_result",
+        "common_practice_result"
+      ],
+      "evidence_requirements": [
+        "所用额外性工具及版本",
+        "适用分析及结论",
+        "审定支持与反证处置"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D09.C1",
+          "requirement": "所用额外性工具及版本",
+          "question": "是否有直接原文支持“所用额外性工具及版本”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D09.C2",
+          "requirement": "适用分析及结论",
+          "question": "是否有直接原文支持“适用分析及结论”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D09.C3",
+          "requirement": "审定支持与反证处置",
+          "question": "是否有直接原文支持“审定支持与反证处置”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D10",
+      "name": "Monitoring architecture completeness",
+      "input_fields": [
+        "monitoring_parameters_listed",
+        "qa_qc_procedure_text",
+        "data_gap_procedure_text",
+        "archiving_period_years"
+      ],
+      "evidence_requirements": [
+        "监测参数清单",
+        "QA/QC和缺数程序",
+        "归档周期及执行记录"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D10.C1",
+          "requirement": "监测参数清单",
+          "question": "是否有直接原文支持“监测参数清单”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D10.C2",
+          "requirement": "QA/QC和缺数程序",
+          "question": "是否有直接原文支持“QA/QC和缺数程序”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D10.C3",
+          "requirement": "归档周期及执行记录",
+          "question": "是否有直接原文支持“归档周期及执行记录”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D11",
+      "name": "Verification reproducibility and cycle consistency",
+      "input_fields": [
+        "validator_name",
+        "verifier_name",
+        "verification_period_start",
+        "verification_period_end",
+        "verification_cycle_count"
+      ],
+      "evidence_requirements": [
+        "审定/核证报告与机构",
+        "周期及签发事件",
+        "跨报告差异裁决"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D11.C1",
+          "requirement": "审定/核证报告与机构",
+          "question": "是否有直接原文支持“审定/核证报告与机构”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D11.C2",
+          "requirement": "周期及签发事件",
+          "question": "是否有直接原文支持“周期及签发事件”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D11.C3",
+          "requirement": "跨报告差异裁决",
+          "question": "是否有直接原文支持“跨报告差异裁决”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    },
+    {
+      "dimension_id": "D12",
+      "name": "Registry/version transition readiness",
+      "input_fields": [
+        "methodology_name",
+        "methodology_version",
+        "registered_date",
+        "listed_date",
+        "issuance_cycle_count",
+        "version_change_note"
+      ],
+      "evidence_requirements": [
+        "Registry与方法学版本",
+        "请求类型与提交日期",
+        "过渡规则、变更/续期及签发记录"
+      ],
+      "evaluation_mode": "deterministic_checks_plus_human_judgment",
+      "weight": null,
+      "score_definitions": {
+        "0": "明确反证或已确认不满足本维要求；缺失资料不能据此判0",
+        "1": "有明确主张，但审核认定关键支持薄弱或不足",
+        "2": "关键要求已有支持，审核记录非关键缺口且不影响主要结论",
+        "3": "本维适用要求均有直接且可追溯证据，冲突已裁决"
+      },
+      "required_judgment_fields": [
+        "reviewer",
+        "reason",
+        "criterion_ids",
+        "fact_ids",
+        "evidence",
+        "unresolved_issues"
+      ],
+      "notes": "证据出现或字段齐全不等于充分",
+      "criteria": [
+        {
+          "criterion_id": "D12.C1",
+          "requirement": "Registry与方法学版本",
+          "question": "是否有直接原文支持“Registry与方法学版本”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D12.C2",
+          "requirement": "请求类型与提交日期",
+          "question": "是否有直接原文支持“请求类型与提交日期”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        },
+        {
+          "criterion_id": "D12.C3",
+          "requirement": "过渡规则、变更/续期及签发记录",
+          "question": "是否有直接原文支持“过渡规则、变更/续期及签发记录”，且与本项目、适用版本及评估周期一致？",
+          "mechanical_checks": [
+            "fact_identity",
+            "document_version",
+            "page_and_quote_offsets"
+          ],
+          "human_checks": [
+            "semantic_support",
+            "applicability",
+            "evidence_sufficiency"
+          ],
+          "criticality": "pending_business_confirmation",
+          "required_output": [
+            "outcome",
+            "reason",
+            "fact_ids",
+            "evidence"
+          ],
+          "not_applicable_policy": "explicit_applicability_reason_and_evidence_required"
+        }
+      ]
+    }
+  ],
+  "supersedes": "acm0002-quality-rubric-draft-v1",
+  "criterion_outcomes": [
+    "supported",
+    "not_supported",
+    "insufficient",
+    "conflicting",
+    "not_applicable"
+  ],
+  "aggregation_policy": "manual_dimension_judgment_no_automatic_sum"
+}
