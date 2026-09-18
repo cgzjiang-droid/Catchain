@@ -12,6 +12,7 @@ def test_generate_json_schemas_exports_public_models(tmp_path: Path) -> None:
     assert [path.name for path in written] == [
         "assessment-context.schema.json",
         "document-version.schema.json",
+        "evaluation-result.schema.json",
         "evidence-ref.schema.json",
         "extraction-validation-report.schema.json",
         "field-observation.schema.json",
@@ -51,4 +52,4 @@ def test_schema_export_cli_reports_written_files(tmp_path: Path) -> None:
     result = runner.invoke(app, ["schema", "export", "--output-dir", str(tmp_path)])
 
     assert result.exit_code == 0
-    assert "Exported 12 schemas" in result.stdout
+    assert "Exported 13 schemas" in result.stdout

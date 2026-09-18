@@ -10,6 +10,7 @@
   - [x] 判定输入Schema、事实/原文验证、部分审核与不可变JSON/run保存基础。
   - [x] 结果artifact按12维汇总审核覆盖和未解决状态；仍显式保留空分值/空权重。
   - [x] 评分结果索引与完整payload数据库保存，分值/权重仍保持空值。
+  - [x] EvaluationResult/DimensionEvaluation合同和13个版本化Schema导出。
   - [ ] 已批准分值规则与正式评分结果合同。
 - [ ] Task 4：冻结人工Gold、争议裁决/未知标签、独立评估集与Regex/LLM指标对比。
 

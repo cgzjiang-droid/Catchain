@@ -27,7 +27,7 @@
 新增JudgmentRequest合同和score judgments CLI，核对草案criterion_id、当前正式事实及引用位置。
 支持部分审核并列出未审核项，不将弃答当失败；明确结论必须有事实与证据。
 保存readiness快照、完整人工输入、草案哈希和处理run；相同输入复用，修改追加历史。
-这部分属于Task 3的输入/理由/证据保存基础；artifact按D01-D12保存审核覆盖和逐项判定摘要，明确区分unreviewed、partially_reviewed、unresolved与reviewed_pending_policy；新增evaluation_results表保存项目、rubric哈希、状态和完整payload，仍无分值计算。
+这部分属于Task 3的输入/理由/证据保存基础；EvaluationResult合同在入库前校验D01-D12覆盖、状态分区和空分值；artifact按D01-D12保存审核覆盖和逐项判定摘要，新增evaluation_results表保存项目、rubric哈希、状态和完整payload，仍无分值计算。
 正式业务规则仍待确认，Task 2未关闭。下一步将具体分值判定与可审查审核记录关联。
 锁文件临时环境验证126项测试通过，包含此前两版规则草案测试；原开发环境未替换。
 真实ACR125离线试跑保存1项明确标注为Codex测试的insufficient记录，35项未审核，重复复用成功；总分null，模型调用0。

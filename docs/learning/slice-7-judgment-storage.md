@@ -6,6 +6,7 @@
 证据不足与冲突可以弃答，但不能省略原因；缺失不是不合格。
 
 关键代码：domain/judgment.py定义合同；scoring/judgments.py核对事实快照和引用。
+domain/evaluation.py进一步定义EvaluationResult和DimensionEvaluation，入库前强制校验D01-D12的覆盖、状态和空分值。
 score judgments读取保存的readiness，检查原处理run/哈希，并核对当前已批准事实。
 变更过或过期的快照拒绝执行，其他项目或不属于本维度的事实拒绝引用。
 原文必须存在于所引用事实的Parsed文档版本/页码/字符位置，不能仅贴一段无来源文字。
@@ -18,4 +19,5 @@ score judgments读取保存的readiness，检查原处理run/哈希，并核对�
 旧系统主要保存汇总分；参考存档项目帮助文档版本设计，但不提供本审核协议。
 CATchain保留原JSON交换方式并增加明确Schema和证据验证，无新依赖或Agent框架。
 对应知识是Structured Output、Schema Validation、Evidence Grounding和可复现快照。
+这里的Structured Output不是让LLM直接写分数，而是让系统把人工/模型候选转换成可验证的固定合同；当前draft policy会拒绝任何隐式总分。
 面试可能问：只有一项审核完成能给总分吗？不能。保留部分结果、列出未审项目，按后续批准规则判断可评范围。

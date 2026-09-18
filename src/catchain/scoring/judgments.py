@@ -5,6 +5,7 @@ import json
 from importlib.resources import files
 
 from catchain.domain import PipelineRun, PipelineStage, Registry, RunStatus
+from catchain.domain.evaluation import EvaluationResult
 from catchain.domain.judgment import JudgmentRequest
 from catchain.scoring.readiness import project_readiness
 from catchain.storage.document_repository import SqlAlchemyDocumentRepository
@@ -110,8 +111,8 @@ def grounded_judgments(engine, bundle: dict, request: JudgmentRequest) -> dict:
                 raise ValueError("judgment evidence not grounded in referenced facts")
     covered = {j.criterion_id for j in request.judgments}
     dimensions = _dimension_summaries(rubric, request)
-    return {
-        "schema_version": "1.0.0",
+    result = {
+        "schema_version": "1.1.0",
         "rubric_version": request.rubric_version,
         "rubric_sha256": hashlib.sha256(raw).hexdigest(),
         "rubric_status": rubric["status"],
@@ -128,3 +129,4 @@ def grounded_judgments(engine, bundle: dict, request: JudgmentRequest) -> dict:
             "draft_rubric_no_scores",
         ],
     }
+    return EvaluationResult.model_validate(result).model_dump(mode="json")
