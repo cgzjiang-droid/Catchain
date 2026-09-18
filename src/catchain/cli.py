@@ -188,6 +188,7 @@ def save_judgments_command(
 
     from catchain.domain.judgment import JudgmentRequest
     from catchain.scoring.judgments import grounded_judgments
+    from catchain.storage.evaluation_repository import store_evaluation_result
 
     started = datetime.now(UTC)
     try:
@@ -206,6 +207,11 @@ def save_judgments_command(
         )
         result["pipeline_run_id"] = str(run.pipeline_run_id)
         path, stored, reused = store_baseline_artifact(output_dir, result, run)
+        evaluation = store_evaluation_result(
+            create_sqlite_engine(database),
+            stored["result"],
+            PipelineRun.model_validate(stored["run"]),
+        )
     except (ValueError, OSError, SQLAlchemyError, KeyError, TypeError):
         _fail_parse(
             "JUDGMENTS_FAILED",
@@ -217,6 +223,7 @@ def save_judgments_command(
                 "status": "reused" if reused else "stored",
                 "artifact_path": str(path),
                 "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "evaluation_result_id": evaluation["evaluation_result_id"],
                 "judgment_count": len(request.judgments),
                 "unreviewed_count": len(result["unreviewed_criteria"]),
                 "total_score": None,

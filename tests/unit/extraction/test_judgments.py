@@ -3,11 +3,13 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
+from sqlalchemy import func, select
 from test_review import setup
 from typer.testing import CliRunner
 
 from catchain.cli import app
 from catchain.domain.judgment import CriterionJudgment, JudgmentRequest
+from catchain.storage.database import evaluation_results
 from catchain.storage.review_repository import decide
 
 
@@ -73,7 +75,17 @@ def test_save_judgments_reuse_evidence_and_stale_snapshot(tmp_path):
         "D01.C2",
         "D01.C3",
     ]
+    with engine.connect() as connection:
+        count = connection.execute(
+            select(func.count()).select_from(evaluation_results)
+        ).scalar_one()
+        assert count == 1
     assert json.loads(runner.invoke(app, args).stdout)["status"] == "reused"
+    with engine.connect() as connection:
+        count = connection.execute(
+            select(func.count()).select_from(evaluation_results)
+        ).scalar_one()
+        assert count == 1
     from catchain.domain import EvidenceRef
 
     snapshot = json.loads(Path(json.loads(ready.stdout)["artifact_path"]).read_text())["result"]

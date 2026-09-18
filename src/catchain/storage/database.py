@@ -212,6 +212,29 @@ canonical_heads = Table(
     ),
 )
 
+evaluation_results = Table(
+    "evaluation_results",
+    metadata,
+    Column("evaluation_result_id", String(36), primary_key=True),
+    Column(
+        "pipeline_run_id",
+        String(36),
+        ForeignKey("processing_runs.pipeline_run_id"),
+        nullable=False,
+        unique=True,
+    ),
+    Column("registry", String(32), nullable=False),
+    Column("project_id", String, nullable=False),
+    Column("rubric_version", String, nullable=False),
+    Column("rubric_sha256", String(64), nullable=False),
+    Column("score_status", String, nullable=False),
+    Column("total_score", Float),
+    Column("payload_json", Text, nullable=False),
+    UniqueConstraint(
+        "pipeline_run_id", "rubric_sha256", name="uq_evaluation_result_run_rubric"
+    ),
+)
+
 
 def create_sqlite_engine(database_path: Path) -> Engine:
     """Create an engine for one file-backed SQLite database."""

@@ -34,6 +34,7 @@ def test_initial_migration_creates_document_tables(tmp_path: Path) -> None:
         "canonical_facts",
         "review_requests",
         "canonical_heads",
+        "evaluation_results",
     }
     engine = create_sqlite_engine(database_path)
     with engine.connect() as connection:
