@@ -277,3 +277,33 @@ READINESS_ARTIFACT来自score readiness的artifact_path。没有上下文时仍�
 输出BE-PE-LE、报告值减复算值、绝对差异/报告值百分比（报告值0时null），只作为历史代数诊断。
 不会自动判合规、不会给0–3分、不会写入正式事实。旧Rubric、容差、权重和官方版本仍需确认。
 上下文和报告保存私有位置，重复输入复用；--output-dir可设置检查报告目录。
+
+## 12. 保存逐项人工判定
+
+```bash
+venv/bin/catchain score judgments READINESS_ARTIFACT \
+  --request-file data/review/judgments.json --database data/catchain.sqlite
+```
+
+输入示例（实际填写负责人及理由）：
+
+```json
+{
+  "rubric_version": "acm0002-quality-rubric-draft-v2",
+  "reviewer": "实际审核人",
+  "judgments": [{
+    "criterion_id": "D01.C1",
+    "outcome": "insufficient",
+    "reason": "当前缺少项目边界证明",
+    "fact_ids": [],
+    "evidence": []
+  }]
+}
+```
+
+supported/not_supported/not_applicable必须填正式fact_ids及定位evidence，不能空证据下结论。
+事实必须属于当前readiness对应项目和该维度；证据必须定位于所引用事实对应原文。
+readiness过期或被修改时会拒绝保存，请重新生成并核对人工判断。
+输出judgment_count和unreviewed_count；总分仍null，模型调用0。
+结果保存为私有不可变JSON+run，重复相同输入复用；改变输入形成新历史artifact。
+本命令保存草案审核意见，不等于正式质量评级，也不会写入Canonical或评分结果数据库表。

@@ -177,6 +177,55 @@ def score_checks_command(
     )
 
 
+@score_app.command("judgments")
+def save_judgments_command(
+    readiness_artifact: Annotated[Path, typer.Argument()],
+    request_file: Annotated[Path, typer.Option("--request-file")],
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/extracted/judgments"),
+) -> None:
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from catchain.domain.judgment import JudgmentRequest
+    from catchain.scoring.judgments import grounded_judgments
+
+    started = datetime.now(UTC)
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        bundle = json.loads(readiness_artifact.read_text(encoding="utf-8"))
+        request = JudgmentRequest.model_validate_json(request_file.read_text(encoding="utf-8"))
+        result = grounded_judgments(create_sqlite_engine(database), bundle, request)
+        run = PipelineRun(
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest(),
+            config_hash=result["rubric_sha256"],
+            started_at=started,
+            finished_at=datetime.now(UTC),
+        )
+        result["pipeline_run_id"] = str(run.pipeline_run_id)
+        path, stored, reused = store_baseline_artifact(output_dir, result, run)
+    except (ValueError, OSError, SQLAlchemyError, KeyError, TypeError):
+        _fail_parse(
+            "JUDGMENTS_FAILED",
+            "invalid judgments, stale facts or evidence; request file is preserved",
+        )
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "judgment_count": len(request.judgments),
+                "unreviewed_count": len(result["unreviewed_criteria"]),
+                "total_score": None,
+                "model_calls": 0,
+            }
+        )
+    )
+
+
 @review_app.command("decide")
 def review_decide_command(
     request_file: Annotated[Path, typer.Argument()],
