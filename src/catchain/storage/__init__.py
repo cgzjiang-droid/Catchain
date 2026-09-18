@@ -6,11 +6,13 @@ from catchain.storage.document_repository import (
     DuplicateParsedDocumentError,
     SqlAlchemyDocumentRepository,
 )
+from catchain.storage.postgres import ProductionDatabase
 
 __all__ = [
     "DuplicateDocumentVersionError",
     "DuplicateParsedDocumentError",
     "SqlAlchemyDocumentRepository",
+    "ProductionDatabase",
     "create_schema",
     "create_sqlite_engine",
 ]

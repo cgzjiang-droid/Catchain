@@ -235,6 +235,16 @@ evaluation_results = Table(
     ),
 )
 
+stored_objects = Table(
+    "stored_objects",
+    metadata,
+    Column("object_key", String(512), primary_key=True),
+    Column("sha256", String(64), nullable=False),
+    Column("byte_size", Integer, nullable=False),
+    Column("content_type", String(255), nullable=False),
+    Column("created_at", String, nullable=False),
+)
+
 
 def create_sqlite_engine(database_path: Path) -> Engine:
     """Create an engine for one file-backed SQLite database."""

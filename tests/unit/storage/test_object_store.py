@@ -2,7 +2,28 @@ from io import BytesIO
 
 import pytest
 
-from catchain.storage.object_store import LocalObjectStore
+from catchain.storage.object_store import LocalObjectStore, document_object_key
+
+
+def test_document_object_key_is_traceable_and_stable() -> None:
+    assert document_object_key(
+        registry="verra",
+        project_id="VCS-1234",
+        document_type="pdd",
+        document_version="2026-01-01",
+        sha256="a" * 64,
+    ) == "verra/VCS-1234/pdd/2026-01-01/" + "a" * 64
+
+
+def test_document_object_key_rejects_path_traversal() -> None:
+    with pytest.raises(ValueError, match="path-safe"):
+        document_object_key(
+            registry="verra",
+            project_id="../secret",
+            document_type="pdd",
+            document_version="v1",
+            sha256="a" * 64,
+        )
 
 
 def test_local_object_store_is_immutable_and_hash_checked(tmp_path):
@@ -24,4 +45,3 @@ def test_local_object_store_rejects_traversal(tmp_path):
     store = LocalObjectStore(tmp_path)
     with pytest.raises(ValueError, match="traversal"):
         store.put_immutable("../secret", BytesIO(b"x"), "a" * 64)
-

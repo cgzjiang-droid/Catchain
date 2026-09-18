@@ -10,6 +10,22 @@ from typing import BinaryIO
 from catchain.domain import Sha256
 
 
+def document_object_key(
+    *,
+    registry: str,
+    project_id: str,
+    document_type: str,
+    document_version: str,
+    sha256: Sha256,
+) -> str:
+    """Build the stable key used for immutable document bytes."""
+
+    components = (registry, project_id, document_type, document_version, sha256)
+    if any(not component or "/" in component or ".." in component for component in components):
+        raise ValueError("object-key components must be non-empty and path-safe")
+    return "/".join(components)
+
+
 @dataclass(frozen=True, slots=True)
 class StoredObject:
     key: str
@@ -60,4 +76,3 @@ class LocalObjectStore:
 
     def open(self, key: str):
         return self._path(key).open("rb")
-
