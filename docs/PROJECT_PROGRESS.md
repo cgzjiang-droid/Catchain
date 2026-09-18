@@ -319,3 +319,9 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - `canonical_fact_sources` 记录每个正式 fact 的 `document_version_id`、`parsed_document_id` 和 `validation_run_id`。
 - 新 PDF 不会覆盖旧事实，必须重新完成 Parse、Extract、Validate、Review；只有人工批准才更新 canonical head。
 - 源分支提交 `0943b16`，GitHub 发布仓库提交 `89ad472`；两边全套测试均为166项通过，Ruff通过。
+
+### 评分准入
+
+- 增加 approved policy loader：draft/缺少权威批准信息不能进入正式评分。
+- 增加 frozen Gold acceptance gate：未冻结人工 Gold 时不输出正式准确率、冲突率或总分。
+- 当前源分支提交 `f3407e9`，GitHub 发布仓库提交 `6b7849c`；两边全套测试均为169项通过，Ruff通过。
