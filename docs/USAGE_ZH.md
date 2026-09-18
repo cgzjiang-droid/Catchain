@@ -5,7 +5,7 @@
 当前已实现本地PDF导入、SHA-256去重、文档版本、逐页解析、OCR分流、Regex候选
 抽取与12维关键词Baseline。SQLite保存文档与Parsed页面；抽取/评分候选和成功
 run记录保存为不可变JSON。真实LLM、调用缓存、显式费用控制和同页候选比较已接入；
-机械候选验证、审核分流和Slice 7评估闭环已接入；正式策略仍需人工批准，Slice 8继续实现审核队列和纠错界面。
+机械候选验证、审核分流、Slice 7评估闭环和Slice 8 CLI/JSON审核台已接入；正式策略仍需人工批准，独立前端不是当前MVP依赖。
 完整进度见 [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md)。
 
 ## 安装与检查
@@ -255,7 +255,33 @@ evidence必须包含同版本PDF页码、原文quote、char_start/char_end（当
 格式/证据失败返回status=draft和错误位置，将原输入保存至data/review/drafts，可用--draft-dir修改。
 修正草稿后再提交，失败不会留下正式值。所有审核文件和草稿均为私有、被Git忽略。
 
-## 11. 检查12维评分准备度
+## 11. 审核队列与指标快照
+
+列出当前仍需要人工处理的候选。默认隐藏已经批准的候选，按证据错误、机械拒绝、日期/单位问题、低置信度和语义待确认自动排序：
+
+```bash
+venv/bin/catchain review queue \
+  --database data/catchain.sqlite \
+  --output-dir data/review/queue
+```
+
+可用`--project-id`或`--field-name`缩小范围，`--include-approved`查看已批准历史，`--limit`限制返回数量。
+每个队列项保留candidate_id、项目/字段、原值、validation_status、问题code、错误消息、原文Evidence、当前正式fact_id、历史审核次数和最新审核状态。
+priority只表示人工处理顺序，不代表业务质量分数；approved候选默认不再进入待处理队列，unresolved和rejected仍会显示。
+
+生成审核吞吐与返工指标：
+
+```bash
+venv/bin/catchain review metrics \
+  --database data/catchain.sqlite \
+  --output-dir data/review/metrics
+```
+
+指标包括候选状态、已审核/待审核量、approved/unresolved比例、Evidence覆盖率、字段覆盖率、重复返工数和平均审核延迟。
+快照按内容哈希保存并可复用；`accuracy_eligible`和`total_score_eligible`始终明确为false，Gold或评分策略未获批时不能把这些指标称为模型准确率或正式总分。
+Schema位于`schemas/generated/review-queue-item.schema.json`、`review-queue-snapshot.schema.json`和`review-metrics-snapshot.schema.json`。
+
+## 12. 检查12维评分准备度
 
 ```bash
 venv/bin/catchain score readiness --registry acr --project-id ACR125 \
@@ -270,7 +296,7 @@ methodology_scope只有已批准methodology_name严格为ACM0002时标明范围�
 字段齐全也只标rubric_pending。此命令是准备度检查，不是最终评分；不联网、不调用模型。
 重复当前事实快照复用；新的正式版本产生新的报告，不覆盖旧快照。
 
-## 12. 方法学、周期与算术检查
+## 13. 方法学、周期与算术检查
 
 2026-09-18新增产品规则草案：docs/product/2026-09-18-scoring-rubric-review.md。
 对应scoring/acm0002-quality-rubric-draft-v1.json仅供审查，现有命令不会据此自动评分。
@@ -300,7 +326,7 @@ READINESS_ARTIFACT来自score readiness的artifact_path。没有上下文时仍�
 不会自动判合规、不会给0–3分、不会写入正式事实。旧Rubric、容差、权重和官方版本仍需确认。
 上下文和报告保存私有位置，重复输入复用；--output-dir可设置检查报告目录。
 
-## 13. 保存逐项人工判定
+## 14. 保存逐项人工判定
 
 ```bash
 venv/bin/catchain score judgments READINESS_ARTIFACT \
@@ -331,5 +357,5 @@ readiness过期或被修改时会拒绝保存，请重新生成并核对人工�
 结果保存为私有不可变JSON+run，并在数据库evaluation_results中保存项目、草案哈希、状态和完整payload；重复相同输入复用，改变输入形成新历史artifact。
 数据库需要先执行`venv/bin/alembic upgrade head`，输出还会返回evaluation_result_id。
 如果是旧版`create_schema`创建且没有`alembic_version`的数据库，确认已有0004表结构后先执行`venv/bin/alembic stamp 0004_review_heads`，再执行upgrade；不要直接从0001重复创建旧表。
-结果合同的JSON Schema位于`schemas/generated/evaluation-result.schema.json`；人工Gold合同位于`schemas/generated/gold-sample.schema.json`和`gold-dataset.schema.json`；评分策略合同位于`scoring-policy.schema.json`，可用`venv/bin/catchain schema export`重新生成全部16个Schema。
+结果合同的JSON Schema位于`schemas/generated/evaluation-result.schema.json`；人工Gold合同位于`schemas/generated/gold-sample.schema.json`和`gold-dataset.schema.json`；评分策略和审核台合同位于对应的`schemas/generated/*`文件，可用`venv/bin/catchain schema export`重新生成全部19个Schema。
 本命令保存草案审核意见，不等于正式质量评级，也不会写入Canonical；evaluation_results只保存可追溯的草案结果，不代表正式分数。

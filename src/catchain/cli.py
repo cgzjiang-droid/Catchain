@@ -58,6 +58,74 @@ review_app = typer.Typer(help="Record human decisions and explicitly approve gro
 app.add_typer(review_app, name="review")
 
 
+@review_app.command("queue")
+def review_queue_command(
+    project_id: Annotated[str | None, typer.Option("--project-id")] = None,
+    field_name: Annotated[str | None, typer.Option("--field-name")] = None,
+    include_approved: Annotated[bool, typer.Option("--include-approved")] = False,
+    limit: Annotated[int | None, typer.Option("--limit")] = None,
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/review/queue"),
+) -> None:
+    from catchain.review_queue import build_review_queue, write_snapshot
+
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        snapshot = build_review_queue(
+            create_sqlite_engine(database),
+            project_id=project_id,
+            field_name=field_name,
+            include_approved=include_approved,
+            limit=limit,
+        )
+        path, reused = write_snapshot(output_dir, "review-queue", snapshot)
+    except (ValueError, OSError):
+        _fail_parse("REVIEW_QUEUE_FAILED", "review queue query or artifact storage failed")
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "item_count": len(snapshot.items),
+                "counts_by_review_state": snapshot.counts_by_review_state,
+                "counts_by_priority": snapshot.counts_by_priority,
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+@review_app.command("metrics")
+def review_metrics_command(
+    database: Annotated[Path, typer.Option("--database")] = Path("data/catchain.sqlite"),
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("data/review/metrics"),
+) -> None:
+    from catchain.review_queue import build_review_metrics, write_snapshot
+
+    try:
+        if not database.is_file():
+            raise ValueError("source database absent")
+        snapshot = build_review_metrics(create_sqlite_engine(database))
+        path, reused = write_snapshot(output_dir, "review-metrics", snapshot)
+    except (ValueError, OSError):
+        _fail_parse("REVIEW_METRICS_FAILED", "review metrics query or artifact storage failed")
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "total_candidates": snapshot.total_candidates,
+                "pending_candidates": snapshot.pending_candidates,
+                "decisions": snapshot.decisions,
+                "accuracy_eligible": snapshot.accuracy_eligible,
+                "total_score_eligible": snapshot.total_score_eligible,
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
 @score_app.command("readiness")
 def score_readiness_command(
     registry: Annotated[Registry, typer.Option("--registry")],

@@ -21,6 +21,7 @@ from catchain.domain.gold import GoldDataset, GoldSample
 from catchain.domain.judgment import JudgmentRequest
 from catchain.domain.policy import ScoringPolicy
 from catchain.domain.review import ReviewRequest
+from catchain.domain.review_queue import ReviewMetricsSnapshot, ReviewQueueItem, ReviewQueueSnapshot
 from catchain.domain.validation import ExtractionValidationReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
@@ -28,6 +29,9 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "gold-sample": GoldSample,
     "gold-dataset": GoldDataset,
     "scoring-policy": ScoringPolicy,
+    "review-queue-item": ReviewQueueItem,
+    "review-queue-snapshot": ReviewQueueSnapshot,
+    "review-metrics-snapshot": ReviewMetricsSnapshot,
     "judgment-request": JudgmentRequest,
     "assessment-context": AssessmentContext,
     "review-request": ReviewRequest,

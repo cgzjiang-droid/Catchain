@@ -1,0 +1,148 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "accuracy_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Accuracy Eligible",
+      "type": "boolean"
+    },
+    "approval_rate": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approval Rate"
+    },
+    "average_review_latency_seconds": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Average Review Latency Seconds"
+    },
+    "candidates_by_validation_status": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Candidates By Validation Status",
+      "type": "object"
+    },
+    "decisions": {
+      "minimum": 0,
+      "title": "Decisions",
+      "type": "integer"
+    },
+    "decisions_by_status": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Decisions By Status",
+      "type": "object"
+    },
+    "evidence_coverage": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evidence Coverage"
+    },
+    "field_coverage": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Field Coverage"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "pending_candidates": {
+      "minimum": 0,
+      "title": "Pending Candidates",
+      "type": "integer"
+    },
+    "reviewed_candidates": {
+      "minimum": 0,
+      "title": "Reviewed Candidates",
+      "type": "integer"
+    },
+    "rework_candidate_count": {
+      "minimum": 0,
+      "title": "Rework Candidate Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "total_candidates": {
+      "minimum": 0,
+      "title": "Total Candidates",
+      "type": "integer"
+    },
+    "total_score_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Total Score Eligible",
+      "type": "boolean"
+    },
+    "unresolved_rate": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unresolved Rate"
+    }
+  },
+  "required": [
+    "generated_at",
+    "total_candidates",
+    "candidates_by_validation_status",
+    "reviewed_candidates",
+    "pending_candidates",
+    "decisions",
+    "decisions_by_status",
+    "rework_candidate_count"
+  ],
+  "title": "ReviewMetricsSnapshot",
+  "type": "object"
+}
