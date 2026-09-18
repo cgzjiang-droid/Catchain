@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 from catchain.cli import app
 from catchain.domain import (
     EvidenceRef,
+    GoldDataset,
     GoldFieldLabel,
     GoldSample,
     PipelineRun,
@@ -122,3 +123,33 @@ def test_cli_evaluate_gold_stores_and_reuses_result(tmp_path: Path):
     info = json.loads(first.stdout)
     assert info["metrics"]["accuracy"] == 1
     assert json.loads(runner.invoke(app, args).stdout)["status"] == "reused"
+
+
+def test_cli_evaluate_dataset_requires_complete_frozen_split(tmp_path: Path):
+    gold, extraction = _fixture()
+    dataset = GoldDataset(
+        dataset_version=gold.dataset_version,
+        samples=(gold,),
+        status="frozen",
+        frozen_at=datetime.now(UTC),
+    )
+    report = evaluate_against_gold(gold, extraction)
+    dataset_path = tmp_path / "dataset.json"
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    dataset_path.write_text(dataset.model_dump_json())
+    (reports / "one.json").write_text(json.dumps({"result": report}))
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "evaluate",
+            "dataset",
+            str(dataset_path),
+            str(reports),
+            "--output-dir",
+            str(tmp_path / "out"),
+        ],
+    )
+    assert result.exit_code == 0, result.exception
+    assert json.loads(result.stdout)["metrics"]["samples_evaluated"] == 1

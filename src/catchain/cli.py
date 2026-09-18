@@ -895,6 +895,72 @@ def evaluate_gold_command(
     )
 
 
+@evaluate_app.command("dataset")
+def evaluate_dataset_command(
+    dataset_file: Annotated[Path, typer.Argument()],
+    report_dir: Annotated[Path, typer.Argument()],
+    split: Annotated[str | None, typer.Option("--split")] = None,
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path(
+        "data/extracted/gold-evaluation"
+    ),
+) -> None:
+    """Aggregate complete frozen-Gold reports without model calls."""
+    from catchain.domain.gold import GoldDataset
+    from catchain.extraction.gold_evaluation import aggregate_gold_evaluations
+
+    started_at = datetime.now(UTC)
+    try:
+        if split is not None and split not in {"development", "validation", "test"}:
+            raise ValueError("split must be development, validation or test")
+        dataset = GoldDataset.model_validate_json(dataset_file.read_text(encoding="utf-8"))
+        if not report_dir.is_dir():
+            raise ValueError("evaluation report directory absent")
+        reports = []
+        for report_path in sorted(report_dir.glob("*.json")):
+            bundle = json.loads(report_path.read_text(encoding="utf-8"))
+            reports.append(bundle["result"])
+        report = aggregate_gold_evaluations(dataset, tuple(reports), split=split)
+        report["pipeline_run_id"] = str(uuid4())
+        identity = {
+            "dataset_version": dataset.dataset_version,
+            "split": split or "all",
+            "metric_version": "gold-evaluation-v1",
+        }
+        run = PipelineRun(
+            pipeline_run_id=UUID(report["pipeline_run_id"]),
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(
+                json.dumps(
+                    {"dataset": dataset.model_dump(mode="json"), "reports": reports},
+                    sort_keys=True,
+                ).encode()
+            ).hexdigest(),
+            config_hash=hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest(),
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+        )
+        path, stored, reused = store_baseline_artifact(output_dir, report, run)
+    except (ValueError, OSError, KeyError, TypeError):
+        _fail_parse(
+            "GOLD_DATASET_EVALUATION_FAILED",
+            "frozen dataset and complete reports are required",
+        )
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "dataset_version": stored["result"]["dataset_version"],
+                "split": stored["result"]["split"],
+                "metrics": stored["result"]["metrics"],
+                "model_calls": 0,
+            }
+        )
+    )
+
+
 @validate_app.command("extraction")
 def validate_extraction_command(
     extraction_artifact: Annotated[Path, typer.Argument()],

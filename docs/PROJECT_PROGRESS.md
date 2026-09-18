@@ -39,6 +39,7 @@
 新增gold-sample.schema.json和两项冻结规则测试。当前没有把Codex离线试跑或模型输出冒充真实Gold，Task 4仍未完成独立样本集和指标计算。
 新增frozen Gold离线比较函数和`evaluate gold` CLI，输出字段级agreement、confirmed_accuracy和unknown_abstention_rate；没有配置数值容差，证据只检查候选是否携带引用，尚未接入真实人工数据。
 新增GoldDataset清单合同，校验版本、样本ID和项目级split隔离；真实样本数量与分层仍待人工确认。
+新增`evaluate dataset`聚合CLI，要求选定split的报告完整覆盖，按字段计数汇总accuracy，暂不把不完整样本集当作指标。
 
 ### Slice 7 Task 2：36个可追溯判定项
 

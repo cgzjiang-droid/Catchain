@@ -156,6 +156,16 @@ Regex或LLM处理run，并且项目、Registry、文档版本和Parsed文档身�
 命令只读取已有artifact，不调用模型；输出字段级exact_match、correct_abstention、
 value_mismatch、conflicting_candidates和聚合指标。没有冻结Gold时不会生成accuracy。
 
+多个样本完成后，可按冻结数据集汇总：
+
+```bash
+venv/bin/catchain evaluate dataset GOLD_DATASET REPORT_DIR \
+  --split test --output-dir data/extracted/gold-evaluation
+```
+
+REPORT_DIR中的每个报告必须对应所选split的一个样本，不能漏样本或混入其他样本；聚合使用
+字段计数计算accuracy，不对不完整报告做平均。
+
 ## 7. 验证候选并查看待审核原因
 
 ```bash
