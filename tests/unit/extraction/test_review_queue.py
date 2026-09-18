@@ -78,4 +78,3 @@ def test_review_cli_writes_content_addressed_queue_and_metrics(tmp_path):
     result = json.loads(metrics.stdout)
     assert result["total_candidates"] == 1
     assert result["accuracy_eligible"] is False
-

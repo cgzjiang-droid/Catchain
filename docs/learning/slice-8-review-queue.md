@@ -11,4 +11,3 @@ Slice 7 已经把候选、验证问题、Evidence和审核历史保存下来。S
 这里的技术重点是Projection：数据库保留规范化历史，队列是面向人工的读取视图。它仍是普通Workflow，不需要Agent、RAG或LangGraph。
 
 面试可能问：为什么不让LLM直接决定队列优先级？因为优先级需要可解释、可复现和可审计；问题code和Evidence状态可以用确定性规则排序，语义裁决仍交给人工。
-

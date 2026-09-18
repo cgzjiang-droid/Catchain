@@ -311,4 +311,3 @@ def write_snapshot(output_dir: Path, prefix: str, snapshot) -> tuple[Path, bool]
     finally:
         temporary.unlink(missing_ok=True)
     return path, False
-

@@ -61,4 +61,3 @@ class ReviewMetricsSnapshot(ImmutableDomainModel):
     average_review_latency_seconds: float | None = Field(default=None, ge=0)
     accuracy_eligible: Literal[False] = False
     total_score_eligible: Literal[False] = False
-
