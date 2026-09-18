@@ -313,3 +313,9 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 源仓库与发布仓库目前均为163项测试通过、Ruff通过。
 
 尚未称为Production Ready的外部准入项：真实30G全量导入、PostgreSQL/S3部署与恢复演练、Registry真实端点smoke test、冻结人工Gold、批准版ACM0002评分政策、生产监控告警和灰度运行。它们是上线证据，不用本地fixture冒充。
+
+### 版本重审与Canonical provenance
+
+- `canonical_fact_sources` 记录每个正式 fact 的 `document_version_id`、`parsed_document_id` 和 `validation_run_id`。
+- 新 PDF 不会覆盖旧事实，必须重新完成 Parse、Extract、Validate、Review；只有人工批准才更新 canonical head。
+- 源分支提交 `0943b16`，GitHub 发布仓库提交 `89ad472`；两边全套测试均为166项通过，Ruff通过。
