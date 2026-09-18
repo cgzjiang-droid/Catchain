@@ -42,6 +42,7 @@ parse_app = typer.Typer(help="Convert Raw PDF versions into Parsed documents.")
 extract_app = typer.Typer(help="Produce evidence-backed candidate artifacts.")
 score_app = typer.Typer(help="Run comparison scoring baselines.")
 dataset_app = typer.Typer(help="Build and sample large dataset manifests.")
+production_app = typer.Typer(help="Check production readiness gates.")
 compare_app = typer.Typer(help="Compare candidates on identical selected pages.")
 evaluate_app = typer.Typer(help="Evaluate outputs against frozen human Gold labels.")
 validate_app = typer.Typer(help="Check candidate types, evidence and review requirements.")
@@ -51,6 +52,7 @@ app.add_typer(parse_app, name="parse")
 app.add_typer(extract_app, name="extract")
 app.add_typer(score_app, name="score")
 app.add_typer(dataset_app, name="dataset")
+app.add_typer(production_app, name="production")
 app.add_typer(compare_app, name="compare")
 app.add_typer(evaluate_app, name="evaluate")
 app.add_typer(validate_app, name="validate")
@@ -112,6 +114,24 @@ def dataset_sample_command(
     except (OSError, ValueError):
         _fail_parse("DATASET_SAMPLE_FAILED", "dataset sampling failed")
     typer.echo(json.dumps({"status": "stored", "manifest": str(output), "counts": counts}))
+
+
+@production_app.command("check")
+def production_check_command(
+    evidence_file: Annotated[Path | None, typer.Option("--evidence-file")] = None,
+) -> None:
+    from catchain.production import production_checklist
+
+    try:
+        evidence = (
+            json.loads(evidence_file.read_text(encoding="utf-8")) if evidence_file else {}
+        )
+        result = production_checklist(evidence)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        _fail_parse("PRODUCTION_CHECK_FAILED", "production evidence file is invalid")
+    typer.echo(result.model_dump_json())
+    if result.status == "blocked":
+        raise typer.Exit(code=2)
 
 
 @review_app.command("queue")

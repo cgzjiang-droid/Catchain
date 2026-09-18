@@ -43,6 +43,17 @@ venv/bin/catchain dataset sample data/dataset-manifest.jsonl \
 
 同一Manifest、seed和数量会得到相同结果；样本不足、文件重复和哈希变化会失败。Manifest和抽样文件可以留在本机私有目录，不能提交到GitHub。
 
+## 0.1 检查生产准入状态
+
+生产检查不会把本地代码存在误判为上线完成。默认没有外部证据时返回blocked：
+
+```bash
+venv/bin/catchain production check
+```
+
+如需在受控环境中核对已保存的准入证据，可传入私有JSON；六项都为`true`才会返回`ready`：`real_gold`、`approved_policy`、`registry_sync`、`production_storage`、`review_api`、`observability`。
+本地对象存储接口会按内容哈希原子写入并拒绝哈希不匹配或路径穿越；生产环境将由同一接口接入S3-compatible存储。
+
 ## 1. 导入一份自己的PDF
 
 ```bash
