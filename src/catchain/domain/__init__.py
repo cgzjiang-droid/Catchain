@@ -5,6 +5,7 @@ from catchain.domain.documents import DocumentType, DocumentVersion, Registry, S
 from catchain.domain.evaluation import DimensionEvaluation, EvaluationResult
 from catchain.domain.evidence import EvidenceRef
 from catchain.domain.extraction import FieldObservation, ProjectExtraction
+from catchain.domain.gold import GoldFieldLabel, GoldSample
 from catchain.domain.parsing import ParsedDocument, ParsedPage, TextQuality
 from catchain.domain.pipeline import PipelineRun, PipelineStage, RunStatus
 
@@ -15,6 +16,8 @@ __all__ = [
     "EvidenceRef",
     "EvaluationResult",
     "FieldObservation",
+    "GoldFieldLabel",
+    "GoldSample",
     "ParsedDocument",
     "ParsedPage",
     "PipelineRun",

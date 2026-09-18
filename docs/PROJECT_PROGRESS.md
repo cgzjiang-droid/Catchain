@@ -32,6 +32,12 @@
 锁文件临时环境验证126项测试通过，包含此前两版规则草案测试；原开发环境未替换。
 真实ACR125离线试跑保存1项明确标注为Codex测试的insufficient记录，35项未审核，重复复用成功；总分null，模型调用0。
 
+### Slice 7 Task 4：Gold 样本合同基础
+
+新增GoldSample和GoldFieldLabel合同，区分confirmed、unknown、conflicting；confirmed必须有值和原文证据。
+样本只有在两名审核员、组长裁决、冻结时间齐全且没有未裁决冲突时才能标记frozen；未知可以保留为unknown，不转成错误或0分。
+新增gold-sample.schema.json和两项冻结规则测试。当前没有把Codex离线试跑或模型输出冒充真实Gold，Task 4仍未完成独立样本集和指标计算。
+
 ### Slice 7 Task 2：36个可追溯判定项
 
 规则草案v2新增12维共36个稳定criterion_id，区分支持、不支持、证据不足、冲突、不适用。

@@ -309,5 +309,5 @@ readiness过期或被修改时会拒绝保存，请重新生成并核对人工�
 结果保存为私有不可变JSON+run，并在数据库evaluation_results中保存项目、草案哈希、状态和完整payload；重复相同输入复用，改变输入形成新历史artifact。
 数据库需要先执行`venv/bin/alembic upgrade head`，输出还会返回evaluation_result_id。
 如果是旧版`create_schema`创建且没有`alembic_version`的数据库，确认已有0004表结构后先执行`venv/bin/alembic stamp 0004_review_heads`，再执行upgrade；不要直接从0001重复创建旧表。
-结果合同的JSON Schema位于`schemas/generated/evaluation-result.schema.json`，可用`venv/bin/catchain schema export`重新生成全部13个Schema。
+结果合同的JSON Schema位于`schemas/generated/evaluation-result.schema.json`；人工Gold合同位于`schemas/generated/gold-sample.schema.json`，可用`venv/bin/catchain schema export`重新生成全部14个Schema。
 本命令保存草案审核意见，不等于正式质量评级，也不会写入Canonical；evaluation_results只保存可追溯的草案结果，不代表正式分数。
