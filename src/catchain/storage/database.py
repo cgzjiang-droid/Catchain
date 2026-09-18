@@ -245,6 +245,22 @@ stored_objects = Table(
     Column("created_at", String, nullable=False),
 )
 
+processing_jobs = Table(
+    "processing_jobs",
+    metadata,
+    Column("job_id", String(36), primary_key=True),
+    Column("kind", String(32), nullable=False),
+    Column("input_identity", String(255), nullable=False),
+    Column("payload_json", Text, nullable=False),
+    Column("status", String(32), nullable=False),
+    Column("attempts", Integer, nullable=False),
+    Column("max_attempts", Integer, nullable=False),
+    Column("next_retry_at", String),
+    Column("last_error", Text),
+    Column("created_at", String, nullable=False),
+    UniqueConstraint("kind", "input_identity", name="uq_processing_job_identity"),
+)
+
 
 def create_sqlite_engine(database_path: Path) -> Engine:
     """Create an engine for one file-backed SQLite database."""
