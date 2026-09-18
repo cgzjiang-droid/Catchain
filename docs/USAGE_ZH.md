@@ -304,6 +304,7 @@ venv/bin/catchain score judgments READINESS_ARTIFACT \
 supported/not_supported/not_applicable必须填正式fact_ids及定位evidence，不能空证据下结论。
 事实必须属于当前readiness对应项目和该维度；证据必须定位于所引用事实对应原文。
 readiness过期或被修改时会拒绝保存，请重新生成并核对人工判断。
-输出judgment_count和unreviewed_count；总分仍null，模型调用0。
+输出judgment_count和unreviewed_count；artifact还会按D01-D12列出每个维度的审核覆盖、未审核criterion、逐项判定、status、score和weight。
+当前草案的score_status为pending_policy，score、weight和total_score仍可为null，模型调用0；有判定不等于已经得分。
 结果保存为私有不可变JSON+run，重复相同输入复用；改变输入形成新历史artifact。
 本命令保存草案审核意见，不等于正式质量评级，也不会写入Canonical或评分结果数据库表。

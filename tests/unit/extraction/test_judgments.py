@@ -65,6 +65,14 @@ def test_save_judgments_reuse_evidence_and_stale_snapshot(tmp_path):
     assert first.exit_code == 0, first.exception
     info = json.loads(first.stdout)
     assert info["unreviewed_count"] == 35 and info["total_score"] is None
+    stored = json.loads(Path(info["artifact_path"]).read_text())
+    assert stored["result"]["score_status"] == "pending_policy"
+    assert stored["result"]["dimensions"][0]["status"] == "partially_reviewed"
+    assert stored["result"]["dimensions"][0]["score"] is None
+    assert stored["result"]["dimensions"][0]["unreviewed_criterion_ids"] == [
+        "D01.C2",
+        "D01.C3",
+    ]
     assert json.loads(runner.invoke(app, args).stdout)["status"] == "reused"
     from catchain.domain import EvidenceRef
 

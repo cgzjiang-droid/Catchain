@@ -10,6 +10,49 @@ from catchain.scoring.readiness import project_readiness
 from catchain.storage.document_repository import SqlAlchemyDocumentRepository
 
 
+def _dimension_summaries(rubric: dict, request: JudgmentRequest) -> list[dict]:
+    """Expose review coverage without pretending the draft rubric can score."""
+
+    by_criterion = {judgment.criterion_id: judgment for judgment in request.judgments}
+    summaries: list[dict] = []
+    for dimension in rubric["dimensions"]:
+        criteria = dimension["criteria"]
+        criterion_ids = [criterion["criterion_id"] for criterion in criteria]
+        reviewed = [criterion_id for criterion_id in criterion_ids if criterion_id in by_criterion]
+        judgments = [
+            by_criterion[criterion_id].model_dump(mode="json")
+            for criterion_id in reviewed
+        ]
+        outcomes = {item["outcome"] for item in judgments}
+        unresolved = sorted(outcomes & {"insufficient", "conflicting"})
+        if not reviewed:
+            status = "unreviewed"
+        elif len(reviewed) != len(criterion_ids):
+            status = "partially_reviewed"
+        elif unresolved:
+            status = "unresolved"
+        else:
+            status = "reviewed_pending_policy"
+        summaries.append(
+            {
+                "dimension_id": dimension["dimension_id"],
+                "name": dimension["name"],
+                "criterion_ids": criterion_ids,
+                "reviewed_criterion_ids": reviewed,
+                "unreviewed_criterion_ids": [
+                    criterion_id
+                    for criterion_id in criterion_ids
+                    if criterion_id not in by_criterion
+                ],
+                "judgments": judgments,
+                "status": status,
+                "score": None,
+                "weight": dimension["weight"],
+            }
+        )
+    return summaries
+
+
 def grounded_judgments(engine, bundle: dict, request: JudgmentRequest) -> dict:
     request = JudgmentRequest.model_validate_json(request.model_dump_json())
     readiness = bundle["result"]
@@ -66,6 +109,7 @@ def grounded_judgments(engine, bundle: dict, request: JudgmentRequest) -> dict:
             ):
                 raise ValueError("judgment evidence not grounded in referenced facts")
     covered = {j.criterion_id for j in request.judgments}
+    dimensions = _dimension_summaries(rubric, request)
     return {
         "schema_version": "1.0.0",
         "rubric_version": request.rubric_version,
@@ -74,6 +118,8 @@ def grounded_judgments(engine, bundle: dict, request: JudgmentRequest) -> dict:
         "request": request.model_dump(mode="json"),
         "input_readiness": readiness,
         "unreviewed_criteria": sorted(set(rules) - covered),
+        "dimensions": dimensions,
+        "score_status": "pending_policy",
         "total_score": None,
         "model_calls": 0,
         "limitations": [
