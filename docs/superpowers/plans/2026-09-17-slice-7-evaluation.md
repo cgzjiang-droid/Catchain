@@ -14,6 +14,7 @@
   - [ ] 已批准分值规则与正式评分结果合同。
 - [ ] Task 4：冻结人工Gold、争议裁决/未知标签、独立评估集与Regex/LLM指标对比。
   - [x] GoldSample/GoldFieldLabel合同、confirmed/unknown/conflicting边界和frozen门槛。
+  - [x] frozen Gold字段级离线比较，区分准确、弃答、冲突和不匹配；无Gold时不计算accuracy。
   - [ ] 真实人工样本、独立切分集和Regex/LLM指标计算。
 
 Task 1只报告准备度，不是最终Scoring Engine。旧业务定义可迁移，旧关键词阈值只属于Baseline。
