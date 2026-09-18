@@ -212,6 +212,31 @@ canonical_heads = Table(
     ),
 )
 
+canonical_fact_sources = Table(
+    "canonical_fact_sources",
+    metadata,
+    Column("fact_id", String(36), ForeignKey("canonical_facts.fact_id"), primary_key=True),
+    Column(
+        "document_version_id",
+        String(36),
+        ForeignKey("document_versions.document_version_id"),
+        nullable=False,
+    ),
+    Column(
+        "parsed_document_id",
+        String(36),
+        ForeignKey("parsed_documents.parsed_document_id"),
+        nullable=False,
+    ),
+    Column(
+        "validation_run_id",
+        String(36),
+        ForeignKey("processing_runs.pipeline_run_id"),
+        nullable=False,
+    ),
+    Column("created_at", String, nullable=False),
+)
+
 evaluation_results = Table(
     "evaluation_results",
     metadata,

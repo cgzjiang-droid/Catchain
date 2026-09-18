@@ -10,6 +10,7 @@ from catchain.domain import ProjectExtraction
 from catchain.domain.review import ReviewRequest
 from catchain.domain.validation import ExtractionValidationReport
 from catchain.storage.database import (
+    canonical_fact_sources,
     canonical_facts,
     canonical_heads,
     fact_candidates,
@@ -96,6 +97,7 @@ def decide(engine, request: ReviewRequest):
                 else "null"
             )
             fact_id = None
+            source_link = None
             if request.status == "approved":
                 if request.after.field_name != candidate["field_name"]:
                     raise ReviewBlocked(["replacement_field_mismatch"])
@@ -139,6 +141,13 @@ def decide(engine, request: ReviewRequest):
                         if date.fromisoformat(values[0]) > date.fromisoformat(values[1]):
                             raise ReviewBlocked(["date_order_reversed"])
                 fact_id = str(uuid5(NAMESPACE_URL, f"catchain:decision:{decision_id}"))
+                source_link = {
+                    "fact_id": fact_id,
+                    "document_version_id": str(original.document_version_id),
+                    "parsed_document_id": str(report.parsed_document_id),
+                    "validation_run_id": str(candidate["validation_run_id"]),
+                    "created_at": datetime.now(UTC).isoformat(),
+                }
             after = (
                 json.dumps(request.after.normalized_value, ensure_ascii=False)
                 if request.after
@@ -169,6 +178,7 @@ def decide(engine, request: ReviewRequest):
                         unit=request.after.unit,
                     )
                 )
+                connection.execute(insert(canonical_fact_sources).values(**source_link))
                 if current:
                     connection.execute(
                         update(canonical_heads).where(predicate).values(fact_id=fact_id)

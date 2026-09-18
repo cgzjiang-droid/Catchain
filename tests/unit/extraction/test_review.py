@@ -13,6 +13,7 @@ from catchain.cli import app
 from catchain.domain import DocumentVersion, PipelineRun, PipelineStage, RunStatus, SourceDocument
 from catchain.domain.review import ReviewRequest
 from catchain.storage.database import (
+    canonical_fact_sources,
     canonical_facts,
     canonical_heads,
     create_schema,
@@ -114,6 +115,12 @@ def test_approval_history_reuse_and_stale_write(tmp_path):
         assert (
             connection.execute(select(canonical_heads.c.fact_id)).scalar_one() == second["fact_id"]
         )
+        source = connection.execute(
+            select(canonical_fact_sources).where(
+                canonical_fact_sources.c.fact_id == second["fact_id"]
+            )
+        ).mappings().one()
+        assert source["document_version_id"] == str(request.after.evidence[0].document_version_id)
         decision = (
             connection.execute(
                 select(review_decisions).where(
