@@ -298,3 +298,18 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 跨字段/文档/版本规则、Canonical数据库、审核裁决输入仍待后续Task。
 - 94测试、Ruff、wheel构建与8个Schema检查通过；验证报告见
   `docs/validation/2026-09-17-slice-6-mechanical-validation.md`。
+
+## 生产重构执行检查点（2026-09-18）
+
+这一阶段已经从“Slice/MVP检查点”进入生产主线实现，当前源分支最近提交为
+`93fc88d`，发布仓库 `cgzjiang-droid/Catchain` 最近提交为 `4871c5f`。
+
+- 30G数据：增加流式SHA-256 manifest和development/validation/test确定性抽样，不把原始数据上传GitHub。
+- 存储：增加生产配置拒绝SQLite、本地对象目录的边界，PostgreSQL会话包装、`stored_objects`迁移和稳定对象键。
+- Registry：增加ACR/Gold Standard/Verra adapter合同、旧抓取规则的离线解析器、cursor checkpoint同步服务；线上端点仍未通过smoke test，不伪造成功。
+- Worker：增加`processing_jobs`、幂等入队、claim、有限重试和dead-letter状态。
+- LLM：增加生产调用包装和二次evidence grounding，引用偏移不匹配拒绝进入评分。
+- 审核：增加FastAPI health、review queue、decision API和reviewer/lead/admin角色边界；正式SSO/JWT仍待部署接入。
+- 源仓库与发布仓库目前均为163项测试通过、Ruff通过。
+
+尚未称为Production Ready的外部准入项：真实30G全量导入、PostgreSQL/S3部署与恢复演练、Registry真实端点smoke test、冻结人工Gold、批准版ACM0002评分政策、生产监控告警和灰度运行。它们是上线证据，不用本地fixture冒充。
