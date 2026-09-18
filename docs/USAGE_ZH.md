@@ -144,7 +144,19 @@ LLM_ARTIFACT替换为llm-once的artifact_path，也支持保留完整started记�
 不是事实裁决；both_missing也不是答对。没有人工Gold时accuracy=null。
 重复比较复用不可变报告和原run，--output-dir可自定义私有报告目录。
 
-## 6. 验证候选并查看待审核原因
+## 6. 用冻结Gold评估抽取结果
+
+```bash
+venv/bin/catchain evaluate gold GOLD_SAMPLE EXTRACTION_ARTIFACT \
+  --output-dir data/extracted/gold-evaluation
+```
+
+GOLD_SAMPLE必须是`status=frozen`的GoldSample；EXTRACTION_ARTIFACT必须带有成功的
+Regex或LLM处理run，并且项目、Registry、文档版本和Parsed文档身份一致。
+命令只读取已有artifact，不调用模型；输出字段级exact_match、correct_abstention、
+value_mismatch、conflicting_candidates和聚合指标。没有冻结Gold时不会生成accuracy。
+
+## 7. 验证候选并查看待审核原因
 
 ```bash
 venv/bin/catchain validate extraction EXTRACTION_ARTIFACT \
@@ -163,7 +175,7 @@ missing表示明确弃答；rejected表示机械错误，原值仍保留；needs
 报告run的succeeded仅代表验证处理已完成，不代表每个候选通过或允许上线。
 重复执行复用不可变报告与run，--output-dir可以自定义私有位置。
 
-## 7. 跨字段与来源差异检查
+## 8. 跨字段与来源差异检查
 
 ```bash
 venv/bin/catchain validate project VALIDATION_A VALIDATION_B --database data/catchain.sqlite
@@ -172,7 +184,7 @@ venv/bin/catchain validate project VALIDATION_A VALIDATION_B --database data/cat
 输入同一项目的机械验证报告。保留差异候选和来源版本，状态为unresolved；不自动选新版。
 真实多文档验收尚未完成。完整说明见docs/validation/2026-09-17-slice-6-consistency.md。
 
-## 8. 把验证候选与证据存入数据库
+## 9. 把验证候选与证据存入数据库
 
 ```bash
 venv/bin/catchain store validation VALIDATION_ARTIFACT \
@@ -191,7 +203,7 @@ VALIDATION_ARTIFACT为validate extraction输出，EXTRACTION_ARTIFACT为对应Re
 
 以上是Task 3边界；Task 4现已提供以下明确审核入口。
 
-## 9. 人工裁决与正式事实
+## 10. 人工裁决与正式事实
 
 先获取候选ID、原值/证据和当前正式版本：
 
@@ -233,7 +245,7 @@ evidence必须包含同版本PDF页码、原文quote、char_start/char_end（当
 格式/证据失败返回status=draft和错误位置，将原输入保存至data/review/drafts，可用--draft-dir修改。
 修正草稿后再提交，失败不会留下正式值。所有审核文件和草稿均为私有、被Git忽略。
 
-## 10. 检查12维评分准备度
+## 11. 检查12维评分准备度
 
 ```bash
 venv/bin/catchain score readiness --registry acr --project-id ACR125 \
@@ -248,7 +260,7 @@ methodology_scope只有已批准methodology_name严格为ACM0002时标明范围�
 字段齐全也只标rubric_pending。此命令是准备度检查，不是最终评分；不联网、不调用模型。
 重复当前事实快照复用；新的正式版本产生新的报告，不覆盖旧快照。
 
-## 11. 方法学、周期与算术检查
+## 12. 方法学、周期与算术检查
 
 2026-09-18新增产品规则草案：docs/product/2026-09-18-scoring-rubric-review.md。
 对应scoring/acm0002-quality-rubric-draft-v1.json仅供审查，现有命令不会据此自动评分。
@@ -278,7 +290,7 @@ READINESS_ARTIFACT来自score readiness的artifact_path。没有上下文时仍�
 不会自动判合规、不会给0–3分、不会写入正式事实。旧Rubric、容差、权重和官方版本仍需确认。
 上下文和报告保存私有位置，重复输入复用；--output-dir可设置检查报告目录。
 
-## 12. 保存逐项人工判定
+## 13. 保存逐项人工判定
 
 ```bash
 venv/bin/catchain score judgments READINESS_ARTIFACT \

@@ -42,6 +42,7 @@ parse_app = typer.Typer(help="Convert Raw PDF versions into Parsed documents.")
 extract_app = typer.Typer(help="Produce evidence-backed candidate artifacts.")
 score_app = typer.Typer(help="Run comparison scoring baselines.")
 compare_app = typer.Typer(help="Compare candidates on identical selected pages.")
+evaluate_app = typer.Typer(help="Evaluate outputs against frozen human Gold labels.")
 validate_app = typer.Typer(help="Check candidate types, evidence and review requirements.")
 app.add_typer(schema_app, name="schema")
 app.add_typer(ingest_app, name="ingest")
@@ -49,6 +50,7 @@ app.add_typer(parse_app, name="parse")
 app.add_typer(extract_app, name="extract")
 app.add_typer(score_app, name="score")
 app.add_typer(compare_app, name="compare")
+app.add_typer(evaluate_app, name="evaluate")
 app.add_typer(validate_app, name="validate")
 store_app = typer.Typer(help="Persist validated candidates without canonical promotion.")
 app.add_typer(store_app, name="store")
@@ -819,6 +821,74 @@ def compare_extraction_command(
                 "counts": stored["result"]["counts"],
                 "accuracy": None,
                 "gold_status": "not_available",
+                "model_calls": 0,
+            }
+        )
+    )
+
+
+@evaluate_app.command("gold")
+def evaluate_gold_command(
+    gold_file: Annotated[Path, typer.Argument()],
+    extraction_artifact: Annotated[Path, typer.Argument()],
+    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path(
+        "data/extracted/gold-evaluation"
+    ),
+) -> None:
+    """Evaluate one extraction against a frozen GoldSample without model calls."""
+    from catchain.domain.gold import GoldSample
+    from catchain.extraction.gold_evaluation import evaluate_against_gold
+
+    started_at = datetime.now(UTC)
+    try:
+        gold = GoldSample.model_validate_json(gold_file.read_text(encoding="utf-8"))
+        bundle = json.loads(extraction_artifact.read_text(encoding="utf-8"))
+        extraction = ProjectExtraction.model_validate(bundle["result"])
+        prior_run = PipelineRun.model_validate(bundle["run"])
+        if (
+            prior_run.status != RunStatus.SUCCEEDED
+            or prior_run.stage
+            not in {PipelineStage.BASELINE_EXTRACTED, PipelineStage.LLM_EXTRACTED}
+            or extraction.pipeline_run_id != prior_run.pipeline_run_id
+        ):
+            raise ValueError("extraction artifact/run identity is not evaluable")
+        report = evaluate_against_gold(gold, extraction)
+        report["pipeline_run_id"] = str(uuid4())
+        identity = {
+            "extraction_pipeline_run_id": str(prior_run.pipeline_run_id),
+            "gold_dataset_version": gold.dataset_version,
+            "gold_sample_id": gold.sample_id,
+            "metric_version": "gold-evaluation-v1",
+        }
+        run = PipelineRun(
+            pipeline_run_id=UUID(report["pipeline_run_id"]),
+            stage=PipelineStage.EVALUATED,
+            status=RunStatus.SUCCEEDED,
+            input_hash=hashlib.sha256(
+                json.dumps(
+                    {
+                        "extraction": extraction.model_dump(mode="json"),
+                        "gold": gold.model_dump(mode="json"),
+                    },
+                    sort_keys=True,
+                ).encode()
+            ).hexdigest(),
+            config_hash=hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest(),
+            started_at=started_at,
+            finished_at=datetime.now(UTC),
+        )
+        path, stored, reused = store_baseline_artifact(output_dir, report, run)
+    except (ValueError, OSError, KeyError, TypeError):
+        _fail_parse("GOLD_EVALUATION_FAILED", "frozen Gold and extraction artifact are required")
+    typer.echo(
+        json.dumps(
+            {
+                "status": "reused" if reused else "stored",
+                "artifact_path": str(path),
+                "pipeline_run_id": stored["run"]["pipeline_run_id"],
+                "gold_status": stored["result"]["gold_status"],
+                "sample_id": stored["result"]["sample_id"],
+                "metrics": stored["result"]["metrics"],
                 "model_calls": 0,
             }
         )

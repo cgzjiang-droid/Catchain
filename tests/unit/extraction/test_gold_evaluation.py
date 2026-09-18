@@ -1,9 +1,23 @@
+import hashlib
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from typer.testing import CliRunner
 
-from catchain.domain import EvidenceRef, GoldFieldLabel, GoldSample, ProjectExtraction, Registry
+from catchain.cli import app
+from catchain.domain import (
+    EvidenceRef,
+    GoldFieldLabel,
+    GoldSample,
+    PipelineRun,
+    PipelineStage,
+    ProjectExtraction,
+    Registry,
+    RunStatus,
+)
 from catchain.extraction.gold_evaluation import evaluate_against_gold
 
 
@@ -71,3 +85,40 @@ def test_non_frozen_gold_cannot_produce_accuracy():
     gold, extraction = _fixture(status="draft")
     with pytest.raises(ValueError, match="only frozen"):
         evaluate_against_gold(gold, extraction)
+
+
+def test_cli_evaluate_gold_stores_and_reuses_result(tmp_path: Path):
+    gold, extraction = _fixture()
+    run_id = uuid4()
+    extraction = extraction.model_copy(update={"pipeline_run_id": run_id})
+    run = PipelineRun(
+        pipeline_run_id=run_id,
+        stage=PipelineStage.BASELINE_EXTRACTED,
+        status=RunStatus.SUCCEEDED,
+        input_hash=hashlib.sha256(extraction.model_dump_json().encode()).hexdigest(),
+        config_hash="a" * 64,
+        started_at=datetime.now(UTC),
+        finished_at=datetime.now(UTC),
+    )
+    gold_path = tmp_path / "gold.json"
+    artifact_path = tmp_path / "extraction.json"
+    gold_path.write_text(gold.model_dump_json())
+    artifact_path.write_text(
+        json.dumps(
+            {"result": extraction.model_dump(mode="json"), "run": run.model_dump(mode="json")}
+        )
+    )
+    args = [
+        "evaluate",
+        "gold",
+        str(gold_path),
+        str(artifact_path),
+        "--output-dir",
+        str(tmp_path / "out"),
+    ]
+    runner = CliRunner()
+    first = runner.invoke(app, args)
+    assert first.exit_code == 0, first.exception
+    info = json.loads(first.stdout)
+    assert info["metrics"]["accuracy"] == 1
+    assert json.loads(runner.invoke(app, args).stdout)["status"] == "reused"
