@@ -23,6 +23,26 @@ venv/bin/catchain --help
 OCR需要在系统单独安装Tesseract及相应语言数据，不是Python依赖。没有OCR工具
 时，需OCR的页面会明确报错；不应把错误解释为没有文档或成功提取。
 
+## 0. 为大规模文件建立 Manifest 和抽样集
+
+30G 原始文件保留在手机或外部存储，不上传GitHub。Manifest按8 MiB分块逐文件计算SHA-256，不把整个目录一次性读入内存：
+
+```bash
+venv/bin/catchain dataset manifest /path/to/corpus \
+  --output data/dataset-manifest.jsonl
+```
+
+若目录没有项目元数据，程序使用第一级子目录作为暂定project_id；Registry、document_type和source_url仍需后续从真实来源补齐，不能把推断当作权威来源。
+先生成可控抽样集，不直接处理全部30G：
+
+```bash
+venv/bin/catchain dataset sample data/dataset-manifest.jsonl \
+  --output data/dataset-sample.jsonl \
+  --development 50 --validation 20 --test 20 --seed 20260918
+```
+
+同一Manifest、seed和数量会得到相同结果；样本不足、文件重复和哈希变化会失败。Manifest和抽样文件可以留在本机私有目录，不能提交到GitHub。
+
 ## 1. 导入一份自己的PDF
 
 ```bash

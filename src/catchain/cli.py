@@ -41,6 +41,7 @@ ingest_app = typer.Typer(help="Import source documents into the Raw layer.")
 parse_app = typer.Typer(help="Convert Raw PDF versions into Parsed documents.")
 extract_app = typer.Typer(help="Produce evidence-backed candidate artifacts.")
 score_app = typer.Typer(help="Run comparison scoring baselines.")
+dataset_app = typer.Typer(help="Build and sample large dataset manifests.")
 compare_app = typer.Typer(help="Compare candidates on identical selected pages.")
 evaluate_app = typer.Typer(help="Evaluate outputs against frozen human Gold labels.")
 validate_app = typer.Typer(help="Check candidate types, evidence and review requirements.")
@@ -49,6 +50,7 @@ app.add_typer(ingest_app, name="ingest")
 app.add_typer(parse_app, name="parse")
 app.add_typer(extract_app, name="extract")
 app.add_typer(score_app, name="score")
+app.add_typer(dataset_app, name="dataset")
 app.add_typer(compare_app, name="compare")
 app.add_typer(evaluate_app, name="evaluate")
 app.add_typer(validate_app, name="validate")
@@ -56,6 +58,60 @@ store_app = typer.Typer(help="Persist validated candidates without canonical pro
 app.add_typer(store_app, name="store")
 review_app = typer.Typer(help="Record human decisions and explicitly approve grounded facts.")
 app.add_typer(review_app, name="review")
+
+
+@dataset_app.command("manifest")
+def dataset_manifest_command(
+    root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option("--output")] = Path("data/dataset-manifest.jsonl"),
+    registry: Annotated[Registry | None, typer.Option("--registry")] = None,
+    project_id: Annotated[str | None, typer.Option("--project-id")] = None,
+    document_type: Annotated[DocumentType | None, typer.Option("--document-type")] = None,
+    declared_version: Annotated[str | None, typer.Option("--declared-version")] = None,
+) -> None:
+    from catchain.dataset import build_manifest
+
+    try:
+        header = build_manifest(
+            root,
+            output,
+            registry=registry,
+            project_id=project_id,
+            document_type=document_type,
+            declared_version=declared_version,
+        )
+    except (OSError, ValueError):
+        _fail_parse("DATASET_MANIFEST_FAILED", "dataset manifest generation failed")
+    typer.echo(
+        json.dumps(
+            {"status": "stored", "manifest": str(output), **header.model_dump(mode="json")}
+        )
+    )
+
+
+@dataset_app.command("sample")
+def dataset_sample_command(
+    manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output")],
+    development: Annotated[int, typer.Option("--development")] = 0,
+    validation: Annotated[int, typer.Option("--validation")] = 0,
+    test: Annotated[int, typer.Option("--test")] = 0,
+    seed: Annotated[int, typer.Option("--seed")] = 0,
+) -> None:
+    from catchain.dataset import sample_manifest
+
+    try:
+        counts = sample_manifest(
+            manifest,
+            output,
+            development=development,
+            validation=validation,
+            test=test,
+            seed=seed,
+        )
+    except (OSError, ValueError):
+        _fail_parse("DATASET_SAMPLE_FAILED", "dataset sampling failed")
+    typer.echo(json.dumps({"status": "stored", "manifest": str(output), "counts": counts}))
 
 
 @review_app.command("queue")
