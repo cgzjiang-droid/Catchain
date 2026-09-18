@@ -32,4 +32,3 @@ class DatasetManifestHeader(ImmutableDomainModel):
 
 class SampledManifestRow(ManifestRow):
     sample_split: Literal["development", "validation", "test"]
-

@@ -79,4 +79,3 @@ def sample_manifest(
         temporary.unlink(missing_ok=True)
         raise
     return counts
-

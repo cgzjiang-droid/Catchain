@@ -39,4 +39,3 @@ def test_dataset_cli_builds_manifest_and_sample(tmp_path):
     )
     assert result.exit_code == 0, result.exception
     assert json.loads(result.stdout)["counts"]["test"] == 1
-

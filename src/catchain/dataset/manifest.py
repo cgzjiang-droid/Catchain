@@ -123,4 +123,3 @@ def iter_manifest_rows(path: Path) -> Iterator[ManifestRow]:
         for line in stream:
             if line.strip():
                 yield ManifestRow.model_validate_json(line)
-

@@ -287,4 +287,3 @@ git commit -m "Add production readiness checklist"
 - 真实 Gold、正式 policy、灰度指标和回滚记录可由负责人复核。
 
 **Plan status:** 本计划完成后才允许将 CATchain 标记为完整生产系统；在此之前只能标记为“生产重构进行中”。
-

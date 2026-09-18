@@ -64,4 +64,3 @@ def test_sampling_rejects_short_manifest(tmp_path):
     build_manifest(root, manifest)
     with pytest.raises(ValueError, match="requested"):
         sample_manifest(manifest, tmp_path / "sample.jsonl", development=2, validation=0, test=0)
-

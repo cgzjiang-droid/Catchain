@@ -12,4 +12,3 @@ __all__ = [
     "iter_manifest_rows",
     "sample_manifest",
 ]
-
