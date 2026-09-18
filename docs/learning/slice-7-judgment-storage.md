@@ -22,5 +22,6 @@ CATchain保留原JSON交换方式并增加明确Schema和证据验证，无新�
 这里的Structured Output不是让LLM直接写分数，而是让系统把人工/模型候选转换成可验证的固定合同；当前draft policy会拒绝任何隐式总分。
 GoldSample把confirmed、unknown和conflicting分开；只有两名审核员加组长裁决、带冻结时间且不再有conflicting时，样本才能进入frozen状态。当前没有真实Gold样本被自动创建。
 GoldDataset校验dataset_version一致、sample_id不重复，并禁止同一项目出现在多个split，防止调参集泄漏到测试集。
+ScoringPolicy把draft和approved分开；只有12个维度权重完整且总和为1、来源和审核信息齐全时才能激活，未确认的权重不会产生总分。
 extraction/gold_evaluation.py只接受frozen Gold，逐字段返回exact_match、correct_abstention、value_mismatch和conflicting_candidates；草稿Gold不会产生accuracy。
 面试可能问：只有一项审核完成能给总分吗？不能。保留部分结果、列出未审项目，按后续批准规则判断可评范围。

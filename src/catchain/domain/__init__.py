@@ -8,6 +8,7 @@ from catchain.domain.extraction import FieldObservation, ProjectExtraction
 from catchain.domain.gold import GoldDataset, GoldFieldLabel, GoldSample
 from catchain.domain.parsing import ParsedDocument, ParsedPage, TextQuality
 from catchain.domain.pipeline import PipelineRun, PipelineStage, RunStatus
+from catchain.domain.policy import DimensionWeight, ScoringPolicy
 
 __all__ = [
     "DocumentType",
@@ -19,6 +20,7 @@ __all__ = [
     "GoldFieldLabel",
     "GoldDataset",
     "GoldSample",
+    "DimensionWeight",
     "ParsedDocument",
     "ParsedPage",
     "PipelineRun",
@@ -28,5 +30,6 @@ __all__ = [
     "RunStatus",
     "Sha256",
     "SourceDocument",
+    "ScoringPolicy",
     "TextQuality",
 ]

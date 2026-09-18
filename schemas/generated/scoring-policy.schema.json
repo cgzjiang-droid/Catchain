@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "DimensionWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension_id": {
+          "pattern": "^D(0[1-9]|1[0-2])$",
+          "title": "Dimension Id",
+          "type": "string"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "dimension_id"
+      ],
+      "title": "DimensionWeight",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A versioned 12-dimension policy with an explicit approval boundary.",
+  "properties": {
+    "approved_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved By"
+    },
+    "approved_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved On"
+    },
+    "authority_sources": {
+      "default": [],
+      "items": {
+        "format": "uri",
+        "maxLength": 2083,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Authority Sources",
+      "type": "array"
+    },
+    "dimensions": {
+      "items": {
+        "$ref": "#/$defs/DimensionWeight"
+      },
+      "maxItems": 12,
+      "minItems": 12,
+      "title": "Dimensions",
+      "type": "array"
+    },
+    "policy_version": {
+      "minLength": 1,
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "rubric_version": {
+      "minLength": 1,
+      "title": "Rubric Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "retired"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "policy_version",
+    "rubric_version",
+    "dimensions"
+  ],
+  "title": "ScoringPolicy",
+  "type": "object"
+}

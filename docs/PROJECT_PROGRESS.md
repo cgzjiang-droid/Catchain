@@ -41,6 +41,11 @@
 新增GoldDataset清单合同，校验版本、样本ID和项目级split隔离；真实样本数量与分层仍待人工确认。
 新增`evaluate dataset`聚合CLI，要求选定split的报告完整覆盖，按字段计数汇总accuracy，暂不把不完整样本集当作指标。
 
+### Slice 7 Task 2：评分策略激活门
+
+新增ScoringPolicy合同和Schema：draft可保留空权重；approved必须包含D01-D12全部权重、权重和为1、权威来源、审核人和日期。
+这只是防误激活的工程门，不代表任何官方规则或业务权重已经确认，正式策略仍需人工批准。
+
 ### Slice 7 Task 2：36个可追溯判定项
 
 规则草案v2新增12维共36个稳定criterion_id，区分支持、不支持、证据不足、冲突、不适用。
