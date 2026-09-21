@@ -8,6 +8,11 @@ from catchain.registries.base import (
     RemoteDocument,
     RemoteProject,
 )
+from catchain.registries.smoke import (
+    SmokeResult,
+    classify_smoke_response,
+    smoke_test_url,
+)
 
 __all__ = [
     "DiscoveryPage",
@@ -16,5 +21,7 @@ __all__ = [
     "RegistryNotConfiguredError",
     "RemoteDocument",
     "RemoteProject",
+    "SmokeResult",
+    "classify_smoke_response",
+    "smoke_test_url",
 ]
-

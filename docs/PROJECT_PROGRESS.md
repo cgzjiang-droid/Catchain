@@ -325,3 +325,11 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 增加 approved policy loader：draft/缺少权威批准信息不能进入正式评分。
 - 增加 frozen Gold acceptance gate：未冻结人工 Gold 时不输出正式准确率、冲突率或总分。
 - 当前源分支提交 `f3407e9`，GitHub 发布仓库提交 `6b7849c`；两边全套测试均为169项通过，Ruff通过。
+
+### Registry 真实 smoke-test 检查点（2026-09-21）
+
+- 新增有界只读 HTTP 探测和失败分类：`ok`、`endpoint_mismatch`、`blocked`、`not_found`、`transport_failure`。
+- ACR 根路径返回 200 HTML `Invalid page`，旧文件路径返回 404；Verra 资源路径返回 200 HTML SPA shell；Gold Standard 公共文档路径返回 403。
+- 这些响应不能解释为“Registry 没有数据”；结果已写入 `docs/validation/2026-09-21-registry-smoke-test.md`，并保留明确错误码。
+- 新增 3 个 smoke 单测；源仓库完整回归为 **172 passed**，Ruff 通过。
+- 当前仍未宣称线上同步完成。下一准入项是为三个 Registry 各取得一个已验证的公开或认证 discovery/download fixture，再进行真实小样本同步；30G 数据尚未导入。
