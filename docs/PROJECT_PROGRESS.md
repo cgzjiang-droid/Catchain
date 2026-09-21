@@ -339,4 +339,4 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 新增 `registry_sync_runs` 和 `registry_sync_checkpoints` 表及 Alembic `0009_registry_sync` migration。
 - 同步失败现在保存作用域、稳定错误码和消息；失败页不推进 cursor，下一次运行会从原 cursor 重放。
 - 发现阶段的 Registry 配置错误也会生成失败 run，不再让异常直接丢失进度。
-- 新增同步 repository 和 4 个单元测试；Ruff 通过，migration + sync 定向回归 **6 passed**。
+- 新增同步 repository 和 4 个单元测试；Ruff 通过，migration + sync 定向回归 **6 passed**，完整回归 **175 passed**。
