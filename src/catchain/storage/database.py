@@ -286,6 +286,36 @@ processing_jobs = Table(
     UniqueConstraint("kind", "input_identity", name="uq_processing_job_identity"),
 )
 
+registry_sync_runs = Table(
+    "registry_sync_runs",
+    metadata,
+    Column("sync_run_id", String(36), primary_key=True),
+    Column("registry", String(32), nullable=False),
+    Column("cursor_before", String),
+    Column("cursor_after", String),
+    Column("status", String(32), nullable=False),
+    Column("discovered_projects", Integer, nullable=False),
+    Column("discovered_documents", Integer, nullable=False),
+    Column("failures_json", Text, nullable=False),
+    Column("started_at", String, nullable=False),
+    Column("finished_at", String, nullable=False),
+)
+
+registry_sync_checkpoints = Table(
+    "registry_sync_checkpoints",
+    metadata,
+    Column("registry", String(32), primary_key=True),
+    Column("cursor", String),
+    Column(
+        "last_run_id",
+        String(36),
+        ForeignKey("registry_sync_runs.sync_run_id"),
+        nullable=False,
+    ),
+    Column("status", String(32), nullable=False),
+    Column("updated_at", String, nullable=False),
+)
+
 
 def create_sqlite_engine(database_path: Path) -> Engine:
     """Create an engine for one file-backed SQLite database."""

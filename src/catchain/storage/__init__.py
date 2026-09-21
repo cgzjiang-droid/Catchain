@@ -7,12 +7,15 @@ from catchain.storage.document_repository import (
     SqlAlchemyDocumentRepository,
 )
 from catchain.storage.postgres import ProductionDatabase
+from catchain.storage.sync_repository import SyncRepository, SyncRunRecord
 
 __all__ = [
     "DuplicateDocumentVersionError",
     "DuplicateParsedDocumentError",
     "SqlAlchemyDocumentRepository",
     "ProductionDatabase",
+    "SyncRepository",
+    "SyncRunRecord",
     "create_schema",
     "create_sqlite_engine",
 ]

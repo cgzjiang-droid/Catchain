@@ -1,6 +1,5 @@
 """Incremental registry synchronization services."""
 
-from catchain.sync.service import SyncCheckpoint, SyncReport, SyncService
+from catchain.sync.service import SyncCheckpoint, SyncFailure, SyncReport, SyncService
 
-__all__ = ["SyncCheckpoint", "SyncReport", "SyncService"]
-
+__all__ = ["SyncCheckpoint", "SyncFailure", "SyncReport", "SyncService"]

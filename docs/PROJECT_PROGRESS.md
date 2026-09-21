@@ -333,3 +333,10 @@ llm-once已读取环境变量或本地.env；优先环境变量，不执行配�
 - 这些响应不能解释为“Registry 没有数据”；结果已写入 `docs/validation/2026-09-21-registry-smoke-test.md`，并保留明确错误码。
 - 新增 3 个 smoke 单测；源仓库完整回归为 **172 passed**，Ruff 通过。
 - 当前仍未宣称线上同步完成。下一准入项是为三个 Registry 各取得一个已验证的公开或认证 discovery/download fixture，再进行真实小样本同步；30G 数据尚未导入。
+
+### Registry checkpoint 持久化检查点（2026-09-21）
+
+- 新增 `registry_sync_runs` 和 `registry_sync_checkpoints` 表及 Alembic `0009_registry_sync` migration。
+- 同步失败现在保存作用域、稳定错误码和消息；失败页不推进 cursor，下一次运行会从原 cursor 重放。
+- 发现阶段的 Registry 配置错误也会生成失败 run，不再让异常直接丢失进度。
+- 新增同步 repository 和 4 个单元测试；Ruff 通过，migration + sync 定向回归 **6 passed**。

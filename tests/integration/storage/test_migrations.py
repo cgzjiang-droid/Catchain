@@ -38,6 +38,8 @@ def test_initial_migration_creates_document_tables(tmp_path: Path) -> None:
         "stored_objects",
         "processing_jobs",
         "canonical_fact_sources",
+        "registry_sync_runs",
+        "registry_sync_checkpoints",
     }
     engine = create_sqlite_engine(database_path)
     with engine.connect() as connection:
